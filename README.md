@@ -1,6 +1,13 @@
 # Echo Atlas
 
-**Echo Atlas** is a multilingual browser-based listening puzzle and free-play scale explorer created by **Adrian Janitra Putra / japutraa**.
+[![Play Echo Atlas](https://img.shields.io/badge/PLAY-ECHO%20ATLAS-8fa7d8?style=for-the-badge)](https://japutraa.github.io/echo-atlas/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-222?style=for-the-badge&logo=github)](https://japutraa.github.io/echo-atlas/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/japutraa/echo-atlas/blob/main/LICENSE)
+
+**Play directly in your browser:**  
+## [japutraa.github.io/echo-atlas](https://japutraa.github.io/echo-atlas/)
+
+**Echo Atlas** is a multilingual browser-based listening puzzle and free-play scale explorer created by **Adrian Janitra Putra / [japutraa](https://github.com/japutraa)**.
 
 It combines generative ambient sound, music-memory challenges, traditional and microtonal scale references, poetic genre homages, and a meditative visual interface.
 
@@ -41,16 +48,31 @@ Then open:
 http://localhost:8080
 ```
 
+## Live version
+
+The public browser version is available at:
+
+### [https://japutraa.github.io/echo-atlas/](https://japutraa.github.io/echo-atlas/)
+
+The source repository is available at:
+
+### [https://github.com/japutraa/echo-atlas](https://github.com/japutraa/echo-atlas)
+
 ## Publish with GitHub Pages
 
-1. Create a new GitHub repository.
-2. Upload the contents of this folder to the repository root.
-3. Open **Settings → Pages**.
-4. Under **Build and deployment**, select **Deploy from a branch**.
-5. Select the `main` branch and `/ (root)`.
-6. Save.
+This repository includes a GitHub Actions workflow that deploys the site automatically.
 
-GitHub will show the public Pages URL after deployment.
+1. Create the repository as `japutraa/echo-atlas`.
+2. Upload or push the contents of this folder to the `main` branch.
+3. Open **Settings → Pages**.
+4. Under **Build and deployment**, select **GitHub Actions**.
+5. Wait for the `Deploy Echo Atlas to GitHub Pages` workflow to finish.
+
+The game will then be available at:
+
+```text
+https://japutraa.github.io/echo-atlas/
+```
 
 ## Keyboard controls
 
@@ -100,6 +122,14 @@ Audio starts only after a user interaction, as required by modern browsers.
 
 Designed and created by **Adrian Janitra Putra**  
 Published as **japutraa**
+
+## Recommended GitHub About settings
+
+Use these values in the repository's **About** section:
+
+- **Description:** `A multilingual ambient listening puzzle and scale explorer built with the Web Audio API.`
+- **Website:** `https://japutraa.github.io/echo-atlas/`
+- **Topics:** `web-audio`, `music-game`, `ambient`, `microtonal`, `music-theory`, `browser-game`, `generative-music`, `javascript`, `multilingual`, `github-pages`
 
 ## License
 

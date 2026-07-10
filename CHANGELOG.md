@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2 — 2026-07-10
+
+- Added the public GitHub Pages URL.
+- Added direct Play buttons and repository links to the README.
+- Added canonical and Open Graph URLs.
+- Added automatic GitHub Pages deployment via GitHub Actions.
+- Added recommended GitHub About settings.
+
 ## 1.0.1 — 2026-07-10
 
 - Changed the project license to GNU General Public License v3.0.
