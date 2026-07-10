@@ -1,0 +1,18 @@
+{
+  "name": "Echo Atlas",
+  "short_name": "Echo Atlas",
+  "description": "A multilingual ambient listening puzzle and scale explorer by japutraa.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080a10",
+  "theme_color": "#080a10",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,4458 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#080a10" />
+  <meta name="description" content="Echo Atlas is a multilingual, generative ambient music puzzle and scale explorer by japutraa." />
+  <meta name="author" content="Adrian Janitra Putra" />
+  <meta property="og:title" content="Echo Atlas — by japutraa" />
+  <meta property="og:description" content="A multilingual ambient listening puzzle and scale explorer." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Echo Atlas — by japutraa</title>
+  <style>
+    :root {
+      --bg: #080a10;
+      --ink: #f3efe5;
+      --muted: rgba(243, 239, 229, .56);
+      --faint: rgba(243, 239, 229, .12);
+      --accent: 213, 224, 255;
+      --accent2: 134, 159, 210;
+      --orb: 202, 216, 255;
+      --scene-a: rgba(51, 63, 102, .30);
+      --scene-b: rgba(23, 40, 62, .16);
+      --ui: rgba(9, 11, 17, .54);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; min-height: 100%; margin: 0; }
+
+    body {
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    button { font: inherit; color: inherit; }
+
+    .language-switch {
+      position: fixed;
+      z-index: 40;
+      top: max(16px, env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 3px;
+      padding: 4px;
+      border: 1px solid var(--faint);
+      border-radius: 999px;
+      background: rgba(8,10,16,.66);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.18);
+    }
+
+    .language-switch button {
+      min-width: 35px;
+      padding: 7px 9px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 8px;
+      letter-spacing: .14em;
+      transition: color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .language-switch button.active {
+      color: var(--ink);
+      background: rgba(var(--accent), .11);
+      box-shadow: inset 0 0 0 1px rgba(var(--accent), .16);
+    }
+
+    #field {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: .72;
+      pointer-events: none;
+    }
+
+    .veil {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 42%, var(--scene-a), transparent 35%),
+        radial-gradient(circle at 10% 90%, var(--scene-b), transparent 34%),
+        radial-gradient(circle at 92% 12%, rgba(var(--accent2), .08), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,.012), transparent 32%, rgba(0,0,0,.2));
+      transition: background 1.2s ease;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      opacity: .11;
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+    }
+
+    .app {
+      position: relative;
+      z-index: 2;
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: 218px minmax(0, 1fr) 220px;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 18px 28px;
+      padding:
+        max(22px, env(safe-area-inset-top))
+        max(24px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom))
+        max(24px, env(safe-area-inset-left));
+    }
+
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      z-index: 4;
+    }
+
+    .brand .eyebrow,
+    .micro-label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(27px, 4.1vw, 48px);
+      font-weight: 400;
+      line-height: .92;
+      letter-spacing: -.045em;
+    }
+
+    .place {
+      max-width: 330px;
+      text-align: right;
+    }
+
+    .place strong {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(24px, 3vw, 38px);
+      line-height: 1;
+      font-weight: 400;
+    }
+
+    .place span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .map {
+      grid-column: 1;
+      grid-row: 2;
+      align-self: center;
+      display: grid;
+      gap: 6px;
+      z-index: 4;
+    }
+
+    .map-title {
+      margin: 0 0 12px 2px;
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+    }
+
+    .map-node {
+      position: relative;
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 48px;
+      padding: 7px 8px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      opacity: .54;
+      transition: opacity .25s ease, background .25s ease, border-color .25s ease, transform .25s ease;
+    }
+
+    .map-node::after {
+      content: "";
+      position: absolute;
+      left: 20px;
+      top: calc(100% - 2px);
+      width: 1px;
+      height: 10px;
+      background: var(--faint);
+    }
+
+    .map-node:last-child::after { display: none; }
+
+    .map-node:not(:disabled):hover {
+      opacity: .9;
+      transform: translateX(2px);
+    }
+
+    .map-node.active {
+      opacity: 1;
+      border-color: rgba(var(--accent), .18);
+      background: rgba(var(--accent), .055);
+    }
+
+    .map-node:disabled { cursor: default; opacity: .22; }
+
+    .sigil {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--faint);
+      border-radius: 50%;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 11px;
+    }
+
+    .map-node.active .sigil,
+    .map-node.complete .sigil {
+      border-color: rgba(var(--accent), .55);
+      box-shadow: 0 0 22px rgba(var(--accent), .12);
+    }
+
+    .map-copy strong {
+      display: block;
+      font-size: 11px;
+      font-weight: 520;
+      letter-spacing: .03em;
+    }
+
+    .map-copy span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 8px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .stage-dots {
+      display: flex;
+      gap: 4px;
+      margin-top: 7px;
+    }
+
+    .stage-dots i {
+      width: 13px;
+      height: 2px;
+      border-radius: 99px;
+      background: var(--faint);
+    }
+
+    .stage-dots i.done {
+      background: rgba(var(--accent), .72);
+      box-shadow: 0 0 8px rgba(var(--accent), .25);
+    }
+
+    main {
+      grid-column: 2;
+      grid-row: 2;
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .world {
+      position: relative;
+      container-type: inline-size;
+      width: min(67vh, 58vw, 630px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+    }
+
+    .ring {
+      position: absolute;
+      inset: 4%;
+      border: 1px solid rgba(var(--accent), .16);
+      border-radius: 50%;
+      box-shadow:
+        inset 0 0 100px rgba(var(--accent), .025),
+        0 0 110px rgba(var(--accent), .045);
+      transition: border-color 1s ease, box-shadow 1s ease;
+    }
+
+    .ring::before,
+    .ring::after {
+      content: "";
+      position: absolute;
+      border-radius: inherit;
+      border: 1px solid rgba(var(--accent), .065);
+    }
+
+    .ring::before {
+      inset: 11%;
+      border-style: dashed;
+      animation: drift 42s linear infinite;
+    }
+
+    .ring::after {
+      inset: 29%;
+      animation: driftReverse 31s linear infinite;
+    }
+
+    @keyframes drift { to { transform: rotate(360deg); } }
+    @keyframes driftReverse { to { transform: rotate(-360deg); } }
+
+    .orbit-line {
+      position: absolute;
+      inset: 17%;
+      border-radius: 50%;
+      border: 1px solid rgba(var(--accent), .045);
+    }
+
+    .tones {
+      position: absolute;
+      inset: 0;
+    }
+
+    .tone {
+      --angle: 0deg;
+      --counter: 0deg;
+      --radius: min(25vw, 25vh, 235px);
+      --size: clamp(52px, 7.3vw, 78px);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: var(--size);
+      aspect-ratio: 1;
+      border: 1px solid rgba(var(--orb), .31);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 28%, rgba(var(--orb), .29), rgba(var(--orb), .08) 42%, rgba(0,0,0,.25) 76%),
+        rgba(255,255,255,.018);
+      box-shadow:
+        inset 0 0 26px rgba(var(--orb), .065),
+        0 14px 34px rgba(0,0,0,.28);
+      cursor: pointer;
+      outline: none;
+      transform:
+        translate(-50%, -50%)
+        rotate(var(--angle))
+        translateY(calc(0px - var(--radius)))
+        rotate(var(--counter))
+        scale(1);
+      transition:
+        opacity .28s ease,
+        filter .28s ease,
+        border-color .18s ease,
+        box-shadow .18s ease;
+    }
+
+    .tone::before {
+      content: "";
+      position: absolute;
+      inset: 23%;
+      border-radius: inherit;
+      border: 1px solid rgba(var(--orb), .18);
+    }
+
+    .tone::after {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      border: 1px solid rgba(var(--orb), 0);
+      opacity: 0;
+    }
+
+    .tone:hover {
+      border-color: rgba(var(--orb), .68);
+      box-shadow:
+        inset 0 0 28px rgba(var(--orb), .11),
+        0 0 32px rgba(var(--orb), .13);
+    }
+
+    .tone:focus-visible {
+      box-shadow: 0 0 0 3px rgba(var(--orb), .10), 0 0 36px rgba(var(--orb), .16);
+    }
+
+    .tone.active {
+      border-color: rgba(var(--orb), .96);
+      box-shadow:
+        inset 0 0 34px rgba(var(--orb), .14),
+        0 0 50px rgba(var(--orb), .27);
+      animation: toneBloom .54s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .tone.active::after {
+      animation: ripple .72s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .tone.dim { opacity: .18; filter: saturate(.25); }
+    .tone.hidden-pulse.active { opacity: .18; box-shadow: none; border-color: rgba(var(--orb), .12); }
+
+    @keyframes toneBloom {
+      50% {
+        transform:
+          translate(-50%, -50%)
+          rotate(var(--angle))
+          translateY(calc(0px - var(--radius)))
+          rotate(var(--counter))
+          scale(1.12);
+      }
+    }
+
+    @keyframes ripple {
+      0% { opacity: .8; transform: scale(1); border-color: rgba(var(--orb), .7); }
+      100% { opacity: 0; transform: scale(1.8); border-color: rgba(var(--orb), 0); }
+    }
+
+    .center {
+      position: relative;
+      z-index: 3;
+      width: min(45%, 230px);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .center .stage {
+      margin-bottom: 12px;
+      color: rgba(var(--accent), .68);
+      font-size: 9px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+    }
+
+    .center h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(20px, 3vw, 31px);
+      line-height: 1.08;
+      font-weight: 400;
+      letter-spacing: -.02em;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .center p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.65;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: opacity .18s ease;
+    }
+
+    .listening-dot {
+      width: 5px;
+      height: 5px;
+      margin: 16px auto 0;
+      border-radius: 50%;
+      background: rgba(var(--accent), .8);
+      opacity: 0;
+      box-shadow: 0 0 15px rgba(var(--accent), .55);
+    }
+
+    .listening-dot.on {
+      opacity: 1;
+      animation: breathe 1.1s ease-in-out infinite;
+    }
+
+    @keyframes breathe { 50% { opacity: .25; transform: scale(2); } }
+
+    .info {
+      grid-column: 3;
+      grid-row: 2;
+      align-self: center;
+      display: grid;
+      gap: 22px;
+      z-index: 4;
+    }
+
+    .info-card {
+      padding: 17px;
+      border: 1px solid var(--faint);
+      border-radius: 18px;
+      background: var(--ui);
+      backdrop-filter: blur(18px);
+    }
+
+    .info-card h3 {
+      margin: 0 0 9px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .info-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.65;
+    }
+
+    .scale-notes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 13px;
+    }
+
+    .scale-notes span {
+      padding: 5px 7px;
+      border: 1px solid rgba(var(--accent), .13);
+      border-radius: 999px;
+      color: rgba(var(--accent), .72);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 8px;
+    }
+
+    .modifier {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--faint);
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.4;
+    }
+
+    .modifier b {
+      width: 23px;
+      height: 23px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(var(--accent), .18);
+      border-radius: 50%;
+      color: rgba(var(--accent), .8);
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    footer {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px;
+      z-index: 5;
+    }
+
+    .controls {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .pill {
+      min-width: 112px;
+      padding: 11px 16px;
+      border: 1px solid var(--faint);
+      border-radius: 999px;
+      background: rgba(255,255,255,.028);
+      backdrop-filter: blur(16px);
+      cursor: pointer;
+      font-size: 9px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      transition: opacity .18s ease, border-color .18s ease, background .18s ease, transform .18s ease;
+    }
+
+    .pill:hover:not(:disabled) {
+      border-color: rgba(var(--accent), .3);
+      background: rgba(var(--accent), .06);
+      transform: translateY(-1px);
+    }
+
+    .pill:disabled { opacity: .28; cursor: default; }
+
+    .round {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--faint);
+      border-radius: 50%;
+      background: rgba(255,255,255,.025);
+      cursor: pointer;
+    }
+
+    .round.music-on {
+      border-color: rgba(var(--accent), .30);
+      background: rgba(var(--accent), .07);
+      box-shadow: 0 0 18px rgba(var(--accent), .08);
+    }
+
+    .round.music-off {
+      opacity: .46;
+      box-shadow: none;
+    }
+
+    .volume-cradle {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 5px 9px 5px 5px;
+      border: 1px solid var(--faint);
+      border-radius: 21px;
+      background: rgba(255,255,255,.022);
+      backdrop-filter: blur(16px);
+    }
+
+    .volume-panel {
+      display: grid;
+      gap: 5px;
+      min-width: 242px;
+      padding: 2px 3px 2px 0;
+    }
+
+    .volume-line {
+      display: grid;
+      grid-template-columns: 14px 60px minmax(76px, 1fr) 35px;
+      align-items: center;
+      gap: 7px;
+      min-height: 22px;
+      cursor: pointer;
+    }
+
+    .volume-icon {
+      color: rgba(var(--accent), .72);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .volume-mini,
+    .volume-readout {
+      color: var(--muted);
+      font-size: 8px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .volume-readout {
+      text-align: right;
+      color: rgba(var(--accent), .78);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .volume-line input[type="range"] {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      accent-color: rgb(var(--accent));
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .volume-line input[type="range"]::-webkit-slider-runnable-track {
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(var(--accent), .72), rgba(var(--accent2), .30));
+    }
+
+    .volume-line input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 11px;
+      height: 11px;
+      margin-top: -4.5px;
+      border: 1px solid rgba(var(--accent), .34);
+      border-radius: 50%;
+      background: rgba(245,244,239,.95);
+      box-shadow: 0 0 0 4px rgba(var(--accent), .07);
+    }
+
+    .volume-line input[type="range"]::-moz-range-track {
+      height: 2px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(var(--accent), .72), rgba(var(--accent2), .30));
+    }
+
+    .volume-line input[type="range"]::-moz-range-thumb {
+      width: 11px;
+      height: 11px;
+      border: 1px solid rgba(var(--accent), .34);
+      border-radius: 50%;
+      background: rgba(245,244,239,.95);
+      box-shadow: 0 0 0 4px rgba(var(--accent), .07);
+    }
+
+    .journey {
+      width: min(39vw, 400px);
+    }
+
+    .journey-head {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 8px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .journey-track {
+      height: 1px;
+      background: var(--faint);
+    }
+
+    .journey-track div {
+      width: 0%;
+      height: 1px;
+      background: rgba(var(--accent), .78);
+      box-shadow: 0 0 12px rgba(var(--accent), .38);
+      transition: width .7s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .splash {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(62, 73, 116, .30), transparent 34%),
+        rgba(6, 8, 13, .93);
+      backdrop-filter: blur(18px);
+      transition: opacity .8s ease, visibility .8s ease;
+    }
+
+    .splash.closed { opacity: 0; visibility: hidden; }
+
+    .splash-card {
+      width: min(560px, 100%);
+      text-align: center;
+    }
+
+    .splash-symbol {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 26px;
+      border: 1px solid rgba(230,238,255,.2);
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 0 60px rgba(126,150,219,.09);
+      animation: splashTurn 18s linear infinite;
+    }
+
+    .splash-symbol::before,
+    .splash-symbol::after {
+      content: "";
+      position: absolute;
+      border-radius: inherit;
+      border: 1px solid rgba(230,238,255,.12);
+    }
+
+    .splash-symbol::before { inset: 18%; }
+    .splash-symbol::after { inset: 38%; background: rgba(230,238,255,.7); box-shadow: 0 0 16px rgba(230,238,255,.5); }
+
+    @keyframes splashTurn { to { transform: rotate(360deg); } }
+
+    .splash h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 400;
+      font-size: clamp(44px, 10vw, 80px);
+      line-height: .88;
+      letter-spacing: -.06em;
+    }
+
+    .splash .lead {
+      max-width: 420px;
+      margin: 24px auto 0;
+      color: rgba(243,239,229,.64);
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .splash button {
+      margin-top: 30px;
+      padding: 13px 22px;
+      border: 1px solid rgba(230,238,255,.22);
+      border-radius: 999px;
+      background: rgba(230,238,255,.055);
+      cursor: pointer;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    .splash small {
+      display: block;
+      margin-top: 17px;
+      color: rgba(243,239,229,.34);
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .creator-mark {
+      position: fixed;
+      z-index: 45;
+      right: max(16px, env(safe-area-inset-right));
+      bottom: max(14px, env(safe-area-inset-bottom));
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+
+    .creator-trigger {
+      position: relative;
+      z-index: 2;
+      pointer-events: auto;
+      padding: 7px 10px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(230,234,244,.38);
+      cursor: pointer;
+      font-size: 8px;
+      letter-spacing: .13em;
+      text-transform: lowercase;
+      transition:
+        color .22s ease,
+        border-color .22s ease,
+        background .22s ease,
+        transform .22s ease;
+    }
+
+    .creator-trigger:hover,
+    .creator-trigger:focus-visible,
+    .creator-mark.open .creator-trigger {
+      color: rgba(240,242,247,.82);
+      border-color: rgba(var(--accent), .16);
+      background: rgba(8,10,16,.48);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .creator-reveal {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 9px);
+      width: min(286px, calc(100vw - 32px));
+      padding: 13px 15px;
+      border: 1px solid rgba(var(--accent), .15);
+      border-radius: 15px;
+      background:
+        radial-gradient(circle at 86% 18%, rgba(var(--accent), .08), transparent 34%),
+        rgba(7,9,14,.82);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.30);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px) scale(.98);
+      transform-origin: right bottom;
+      transition:
+        opacity .22s ease,
+        visibility .22s ease,
+        transform .22s ease;
+      pointer-events: none;
+    }
+
+    .creator-reveal strong,
+    .creator-reveal span {
+      display: block;
+    }
+
+    .creator-reveal strong {
+      margin-bottom: 6px;
+      color: rgba(241,242,246,.90);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: .025em;
+    }
+
+    .creator-reveal span {
+      color: rgba(206,211,224,.54);
+      font-size: 9px;
+      line-height: 1.55;
+      letter-spacing: .065em;
+    }
+
+    .creator-mark:hover .creator-reveal,
+    .creator-mark:focus-within .creator-reveal,
+    .creator-mark.open .creator-reveal {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    @media (max-width: 620px) {
+      .creator-mark {
+        right: 12px;
+        bottom: 10px;
+      }
+
+      .creator-trigger {
+        padding: 6px 8px;
+      }
+
+      .creator-reveal {
+        width: min(260px, calc(100vw - 24px));
+      }
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 15;
+      left: 50%;
+      bottom: 80px;
+      transform: translate(-50%, 12px);
+      padding: 9px 13px;
+      border: 1px solid var(--faint);
+      border-radius: 999px;
+      background: rgba(7,9,14,.76);
+      backdrop-filter: blur(16px);
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .flash {
+      position: fixed;
+      z-index: 12;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .flash.good { animation: goodFlash .8s ease; }
+    .flash.bad { animation: badFlash .42s ease; }
+    @keyframes goodFlash { 18% { background: rgba(220,240,226,.05); } }
+    @keyframes badFlash { 18% { background: rgba(255,100,112,.055); } }
+
+    .finale {
+      position: fixed;
+      z-index: 18;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(4,6,10,.78);
+      backdrop-filter: blur(24px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .7s ease, visibility .7s ease;
+    }
+
+    .finale.show { opacity: 1; visibility: visible; }
+
+    .finale-card {
+      width: min(620px, 100%);
+      text-align: center;
+    }
+
+    .finale h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(39px, 8vw, 70px);
+      line-height: .95;
+      font-weight: 400;
+      letter-spacing: -.05em;
+    }
+
+    .finale p {
+      max-width: 440px;
+      margin: 20px auto 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .finale button {
+      margin-top: 27px;
+      padding: 12px 19px;
+      border: 1px solid var(--faint);
+      border-radius: 999px;
+      background: rgba(255,255,255,.035);
+      cursor: pointer;
+      font-size: 9px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+        gap: 12px;
+      }
+
+      header { grid-column: 1; }
+      .map {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: auto;
+        display: flex;
+        overflow-x: auto;
+        gap: 7px;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+      }
+
+      .map::-webkit-scrollbar { display: none; }
+      .map-title { display: none; }
+
+      .map-node {
+        min-width: 142px;
+        min-height: 45px;
+        grid-template-columns: 23px 1fr;
+        border-color: rgba(255,255,255,.045);
+        background: rgba(255,255,255,.015);
+      }
+
+      .map-node::after { display: none; }
+      .sigil { width: 23px; height: 23px; }
+      main { grid-column: 1; grid-row: 3; }
+      .world { width: min(61vh, 84vw, 570px); }
+      .info {
+        grid-column: 1;
+        grid-row: 4;
+        display: block;
+      }
+
+      .info-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 4px 16px;
+        padding: 12px 15px;
+      }
+
+      .info-card h3 { font-size: 15px; margin: 0; }
+      .info-card p { grid-column: 1; }
+      .scale-notes { grid-column: 2; grid-row: 1 / 3; align-self: center; justify-content: flex-end; max-width: 230px; margin: 0; }
+      .modifier { grid-column: 1 / -1; margin-top: 6px; padding-top: 8px; }
+
+      footer { grid-column: 1; grid-row: 5; }
+    }
+
+    @media (max-width: 620px) {
+      .app {
+        padding-left: 16px;
+        padding-right: 16px;
+        gap: 9px;
+      }
+
+      .brand h1 { font-size: 29px; }
+      .place { width: 52vw; max-width: 52vw; }
+      .place strong { font-size: 19px; line-height: .94; }
+      .place span { font-size: 7px; line-height: 1.35; letter-spacing: .12em; }
+      .map-node { min-width: 130px; }
+      .world { width: min(55vh, 92vw, 510px); }
+      .tone { --size: clamp(44px, 14vw, 63px); --radius: min(39vw, 24vh, 210px); }
+      .center { width: 44%; }
+      .center h2 { font-size: 20px; }
+      .center p { font-size: 8px; }
+      .scale-notes { display: none; }
+      .info-card { grid-template-columns: 1fr; }
+      .info-card p, .modifier { grid-column: 1; }
+      footer { align-items: center; }
+      .journey { width: 42vw; }
+      .pill { min-width: 96px; padding-inline: 12px; }
+      .controls { flex-wrap: wrap; row-gap: 8px; }
+      .volume-cradle { min-width: 100%; justify-content: space-between; order: 4; }
+      .volume-panel { min-width: 0; width: 100%; }
+      .volume-line { grid-template-columns: 14px 60px minmax(60px, 1fr) 35px; }
+    }
+
+    @media (max-height: 700px) and (min-width: 981px) {
+      .app { padding-top: 17px; padding-bottom: 15px; }
+      .world { width: min(62vh, 55vw, 550px); }
+      .tone { --size: clamp(48px, 7vw, 67px); }
+      .map-node { min-height: 41px; }
+      .info { gap: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+
+    /* Free Mode & Hidden Gardens */
+    .map-section {
+      margin: 14px 0 4px 2px;
+      color: rgba(var(--accent), .56);
+      font-size: 8px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+    }
+
+    .map-section:first-of-type { margin-top: 0; }
+
+    .map-node.bonus {
+      border-color: rgba(var(--accent), .055);
+    }
+
+    .map-node.free-only:not(.active) .sigil::after {
+      content: "∞";
+      position: absolute;
+      right: -5px;
+      bottom: -4px;
+      width: 13px;
+      height: 13px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--bg);
+      color: rgba(var(--accent), .58);
+      font-size: 8px;
+    }
+
+    .sigil { position: relative; }
+
+    .mode-pill {
+      min-width: 128px;
+    }
+
+    .mode-pill.active {
+      border-color: rgba(var(--accent), .37);
+      background: rgba(var(--accent), .085);
+      box-shadow: 0 0 22px rgba(var(--accent), .07);
+    }
+
+    .scale-cycle {
+      display: none;
+      grid-column: 1 / -1;
+      width: max-content;
+      margin-top: 11px;
+      padding: 8px 11px;
+      border: 1px solid rgba(var(--accent), .14);
+      border-radius: 12px;
+      background: rgba(var(--accent), .035);
+      color: rgba(var(--accent), .8);
+      cursor: pointer;
+      font-size: 8px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    body.free-mode .scale-cycle.visible { display: block; }
+
+    .tone-label {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgba(var(--orb), .78);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: clamp(8px, 1.2vw, 11px);
+      opacity: 0;
+      transform: none;
+      transition: opacity .25s ease;
+      pointer-events: none;
+    }
+
+    body.free-mode .tone-label { opacity: .78; }
+    body.free-mode .tone { border-style: solid; }
+
+    .splash-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .splash-actions button { margin-top: 0; }
+
+    .splash-actions .secondary {
+      background: transparent;
+      border-color: rgba(230,238,255,.12);
+      color: rgba(243,239,229,.7);
+    }
+
+    .free-readout { color: rgba(var(--accent), .72) !important; }
+
+    @media (max-width: 980px) {
+      .map {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .map-section {
+        min-width: max-content;
+        align-self: center;
+        margin: 0 5px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      footer { flex-wrap: wrap; }
+      .controls { width: 100%; overflow-x: auto; padding-bottom: 2px; }
+      .journey { width: 100%; }
+      .mode-pill { min-width: 114px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="language-switch" id="languageSwitch" aria-label="Language">
+    <button data-lang="id">ID</button>
+    <button data-lang="en">EN</button>
+    <button data-lang="de">DE</button>
+  </div>
+  <canvas id="field"></canvas>
+  <div class="veil"></div>
+  <div class="grain"></div>
+
+  <div class="app">
+    <header>
+      <div class="brand">
+        <p class="eyebrow" id="brandEyebrow">A cartography of listening</p>
+        <h1>Echo<br>Atlas</h1>
+      </div>
+
+      <div class="place">
+        <p class="micro-label" id="activeAreaLabel">Area aktif</p>
+        <strong id="areaTitle">Lumen</strong>
+        <span id="areaSubtitle">Diatonis · cahaya pertama</span>
+      </div>
+    </header>
+
+    <nav class="map" id="map" aria-label="Peta perjalanan">
+      <p class="map-title">Atlas bunyi</p>
+    </nav>
+
+    <main>
+      <section class="world" aria-label="Puzzle nada">
+        <div class="ring"></div>
+        <div class="orbit-line"></div>
+        <div class="tones" id="tones"></div>
+
+        <div class="center">
+          <div class="stage" id="stageLabel">Tahap 01 / 04</div>
+          <h2 id="instruction">Tekan dengarkan.</h2>
+          <p id="subtext">Ruang akan memainkan jejak pertamanya.</p>
+          <div class="listening-dot" id="listeningDot"></div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="info">
+      <div class="info-card">
+        <div>
+          <p class="micro-label" id="toneSystemLabel">Sistem nada</p>
+          <h3 id="scaleName">Mayor diatonis</h3>
+        </div>
+        <p id="scaleText">Interval yang terang dan familiar. Perjalanan dimulai dari jarak nada yang mudah dibaca.</p>
+        <div class="scale-notes" id="scaleNotes"></div>
+        <button class="scale-cycle" id="scaleButton">Ganti scale</button>
+        <div class="modifier" id="modifier">
+          <b>→</b>
+          <span>Jawab dalam urutan yang sama.</span>
+        </div>
+      </div>
+    </aside>
+
+    <footer>
+      <div class="controls">
+        <button class="pill" id="mainButton">Dengarkan</button>
+        <button class="pill mode-pill" id="modeButton">Mode bebas</button>
+        <button class="round music-on" id="musicButton" aria-label="Matikan musik latar" title="Ambient generatif">♫</button>
+        <div class="volume-cradle" aria-label="Pengaturan suara">
+          <button class="round" id="soundButton" aria-label="Matikan semua suara" title="Mute semua suara">◖</button>
+          <div class="volume-panel" id="volumePanel">
+            <label class="volume-line" for="backgroundVolumeSlider">
+              <span class="volume-icon">♫</span>
+              <span class="volume-mini" id="ambienceLabel">Ambience</span>
+              <input type="range" id="backgroundVolumeSlider" min="0" max="100" step="1" value="55" aria-label="Volume musik latar">
+              <span class="volume-readout" id="backgroundVolumeValue">55%</span>
+            </label>
+            <label class="volume-line" for="instrumentVolumeSlider">
+              <span class="volume-icon">◉</span>
+              <span class="volume-mini" id="instrumentLabel">Instrument</span>
+              <input type="range" id="instrumentVolumeSlider" min="0" max="100" step="1" value="82" aria-label="Volume instrumen dan puzzle">
+              <span class="volume-readout" id="instrumentVolumeValue">82%</span>
+            </label>
+          </div>
+        </div>
+        <button class="round" id="resetButton" aria-label="Hapus progres" title="Hapus progres">↺</button>
+      </div>
+
+      <div class="journey">
+        <div class="journey-head">
+          <span id="journeyTitle">Perjalanan</span>
+          <span id="journeyLabel">0 / 24</span>
+        </div>
+        <div class="journey-track"><div id="journeyBar"></div></div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="splash" id="splash">
+    <div class="splash-card">
+      <div class="splash-symbol"></div>
+      <p class="micro-label" id="splashTag">Sebuah puzzle musik untuk headphone</p>
+      <h2>Echo<br>Atlas</h2>
+      <p class="lead" id="splashLead">
+        Jelajahi tangga nada dunia sebagai puzzle, atau buka Free Mode untuk memainkan
+        semua wilayah dan distrik genre modern tanpa jawaban benar maupun salah.
+      </p>
+      <div class="splash-actions">
+        <button id="enterChallenge">Mulai perjalanan</button>
+        <button class="secondary" id="enterFree">Jelajah bebas</button>
+      </div>
+      <small id="splashSmall">Challenge menyimpan progres · Free Mode membuka seluruh atlas · dua belas taman bunyi bergerak sebagai ritual ambient yang saling berbaur</small>
+    </div>
+  </div>
+
+  <div class="finale" id="finale">
+    <div class="finale-card">
+      <p class="micro-label" id="finaleTag">Atlas selesai</p>
+      <h2 id="finaleTitle">Kau telah sampai<br>di antara nada.</h2>
+      <p id="finaleBody">
+        Yang berubah bukan hanya tingkat kesulitan, tetapi cara telinga membagi jarak.
+        Jalur puzzle utama selesai. Hidden Gardens tetap dapat dijelajahi melalui Free Mode.
+      </p>
+      <button id="closeFinale">Kembali ke atlas</button>
+    </div>
+  </div>
+
+
+  <div class="creator-mark" id="creatorMark">
+    <button
+      class="creator-trigger"
+      id="creatorTrigger"
+      type="button"
+      aria-expanded="false"
+      aria-controls="creatorReveal"
+    >by japutraa</button>
+    <div class="creator-reveal" id="creatorReveal" role="note">
+      <strong id="creatorName">Adrian Janitra Putra</strong>
+      <span id="creatorHint">Dirakit saat pikiran berada sedikit di atas nada dasarnya.</span>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="flash" id="flash"></div>
+
+  <!--
+  Echo Atlas
+  Copyright (C) 2026 Adrian Janitra Putra
+  SPDX-License-Identifier: GPL-3.0-only
+-->
+<!-- Echo Atlas: ID / EN / DE Multilingual edition · by japutraa -->
+  <script>
+(() => {
+      const STORAGE_KEY = "echo-atlas-progress-v1";
+      const LEGACY_VOLUME_KEY = "echo-atlas-master-volume-v1";
+      const BACKGROUND_VOLUME_KEY = "echo-atlas-background-volume-v1";
+      const INSTRUMENT_VOLUME_KEY = "echo-atlas-instrument-volume-v1";
+      const STAGES_PER_AREA = 4;
+      const CHALLENGE_AREA_COUNT = 6;
+      const LANGUAGE_KEY = "echo-atlas-language-v1";
+
+      const UI_TEXT = {"id":{"pageTitle":"Echo Atlas — Edisi Multibahasa","brandEyebrow":"Sebuah kartografi pendengaran","activeArea":"Area aktif","soundAtlas":"Atlas bunyi","worldScales":"Tangga nada dunia","hiddenGardens":"Taman tersembunyi","pitchPuzzle":"Puzzle nada","toneSystem":"Sistem nada","switchScale":"Ganti scale","journey":"Perjalanan","ambience":"Ambience","instrument":"Instrumen","freeMode":"MODE BEBAS","hiddenGarden":"TAMAN TERSEMBUNYI","stage":"Tahap {stage} / 04","switchScaleCount":"Ganti scale · {current}/{total}","oneScale":"Satu scale","freeModifier":"Tanpa target. Sentuh nada mana pun, atau mainkan scale naik dan turun.","blindModifier":"Saat diputar, cahaya disembunyikan. Andalkan telinga.","normalModifier":"Jawab dalam urutan yang sama.","playSpace":"Mainkan ruang.","noWrong":"Tidak ada jawaban salah dalam Mode Bebas.","pressListen":"Tekan dengarkan.","nextTrace":"Ruang akan memainkan jejak berikutnya.","listen":"Dengarkan","playScale":"Mainkan scale","repeat":"Ulangi","openGate":"Buka gerbang","listenAgain":"Dengarkan lagi","freeModeButton":"Mode bebas","challengeModeButton":"Mode challenge","freeModeActive":"Mode Bebas aktif","challengeModeActive":"Mode Challenge aktif","sequenceListen":"Dengarkan ruang.","blindListen":"Cahaya ditahan. Ingat hanya suaranya.","sequenceForm":"Biarkan pola terbentuk sebelum menjawab.","answerNow":"Sekarang, jawab.","answerBody":"Sentuh gema dalam urutan yang benar.","reverseTitle":"Balikkan gema.","reverseBody":"Mulai dari nada terakhir yang kamu dengar.","rootCent":"Akar · 0 cent","aboveRoot":"{cents} cent di atas akar","continue":"Teruskan.","echoesLeft":"{count} gema lagi.","traceBroken":"Jejak pecah","nearly":"Nyaris.","repeatRoom":"Ruang akan mengulang dirinya.","stageDone":"Tahap {stage} selesai","traceStored":"Jejak tersimpan.","nextRoomOpening":"Ruang berikutnya sedang membuka diri.","areaDone":"Area selesai.","areaNowOpen":"{area} kini terbuka.","gateOpened":"Gerbang baru terbuka","atlasComplete":"Atlas lengkap.","atlasCompleteBody":"Kau telah mendengar hingga ke celah terkecil.","scaleMoves":"Scale bergerak.","scaleMovesBody":"Dengarkan bentuknya naik lalu kembali pulang.","freeTouch":"Sentuh nada mana pun, tanpa jawaban salah.","explore":"jelajah","backgroundOn":"Musik latar dinyalakan","backgroundOff":"Musik latar dimatikan","soundOn":"Suara dinyalakan","soundOff":"Suara dimatikan","ambienceVolume":"Ambience {value}%","instrumentVolume":"Instrumen {value}%","resetConfirm":"Hapus seluruh progres Echo Atlas?","atlasReset":"Atlas diulang","toneLabel":"Nada {label}","splashTag":"Sebuah puzzle musik untuk headphone","splashLead":"Jelajahi tangga nada dunia sebagai puzzle, atau buka Mode Bebas untuk memainkan seluruh wilayah dan Taman Tersembunyi tanpa jawaban benar maupun salah.","startJourney":"Mulai perjalanan","freeExplore":"Jelajah bebas","splashSmall":"Challenge menyimpan progres · Mode Bebas membuka seluruh atlas · dua belas taman bunyi bergerak sebagai ritual ambient yang saling berbaur","finaleTag":"Atlas selesai","finaleTitle":"Kau telah sampai<br>di antara nada.","finaleBody":"Yang berubah bukan hanya tingkat kesulitan, tetapi cara telinga membagi jarak. Jalur puzzle utama selesai. Taman Tersembunyi tetap dapat dijelajahi melalui Mode Bebas.","returnAtlas":"Kembali ke atlas","musicOnAria":"Matikan musik latar","musicOffAria":"Nyalakan musik latar","musicTitle":"Ambient generatif","muteOnAria":"Nyalakan semua suara","muteOffAria":"Matikan semua suara","muteTitle":"Mute semua suara","volumeGroup":"Pengaturan suara","backgroundVolumeAria":"Volume musik latar","instrumentVolumeAria":"Volume instrumen dan puzzle","resetAria":"Hapus progres","resetTitle":"Hapus progres","mapAria":"Peta perjalanan","worldAria":"Puzzle nada","creatorName":"Adrian Janitra Putra","creatorHint":"Dirakit saat pikiran berada sedikit di atas nada dasarnya.","creatorAria":"Tentang pembuat"},"en":{"pageTitle":"Echo Atlas — Multilingual Edition","brandEyebrow":"A cartography of listening","activeArea":"Active area","soundAtlas":"Atlas of sound","worldScales":"World scales","hiddenGardens":"Hidden gardens","pitchPuzzle":"Pitch puzzle","toneSystem":"Tone system","switchScale":"Change scale","journey":"Journey","ambience":"Ambience","instrument":"Instrument","freeMode":"FREE MODE","hiddenGarden":"HIDDEN GARDEN","stage":"Stage {stage} / 04","switchScaleCount":"Change scale · {current}/{total}","oneScale":"One scale","freeModifier":"No target. Touch any tone, or play the scale up and down.","blindModifier":"The lights are hidden during playback. Trust your ears.","normalModifier":"Answer in the same order.","playSpace":"Play the space.","noWrong":"There are no wrong answers in Free Mode.","pressListen":"Press listen.","nextTrace":"The space will play its next trace.","listen":"Listen","playScale":"Play scale","repeat":"Repeat","openGate":"Open gate","listenAgain":"Listen again","freeModeButton":"Free mode","challengeModeButton":"Challenge mode","freeModeActive":"Free Mode active","challengeModeActive":"Challenge Mode active","sequenceListen":"Listen to the space.","blindListen":"The light is withheld. Remember only the sound.","sequenceForm":"Let the pattern take shape before answering.","answerNow":"Now, answer.","answerBody":"Touch the echoes in the correct order.","reverseTitle":"Reverse the echo.","reverseBody":"Begin with the last tone you heard.","rootCent":"Root · 0 cents","aboveRoot":"{cents} cents above the root","continue":"Continue.","echoesLeft":"{count} echoes left.","traceBroken":"The trace broke","nearly":"Almost.","repeatRoom":"The space will repeat itself.","stageDone":"Stage {stage} complete","traceStored":"Trace stored.","nextRoomOpening":"The next space is opening.","areaDone":"Area complete.","areaNowOpen":"{area} is now open.","gateOpened":"A new gate has opened","atlasComplete":"Atlas complete.","atlasCompleteBody":"You have listened into the smallest spaces between tones.","scaleMoves":"The scale is moving.","scaleMovesBody":"Hear its shape rise and return home.","freeTouch":"Touch any tone. There are no wrong answers.","explore":"explore","backgroundOn":"Background music on","backgroundOff":"Background music off","soundOn":"Sound on","soundOff":"Sound off","ambienceVolume":"Ambience {value}%","instrumentVolume":"Instrument {value}%","resetConfirm":"Delete all Echo Atlas progress?","atlasReset":"Atlas reset","toneLabel":"Tone {label}","splashTag":"A musical puzzle for headphones","splashLead":"Explore scales from around the world as a puzzle, or enter Free Mode to play every region and Hidden Garden without right or wrong answers.","startJourney":"Begin journey","freeExplore":"Explore freely","splashSmall":"Challenge saves progress · Free Mode opens the whole atlas · twelve sound gardens move as one interwoven ambient ritual","finaleTag":"Atlas complete","finaleTitle":"You have arrived<br>between the tones.","finaleBody":"What changed was not only the difficulty, but the way your ear divides distance. The main puzzle path is complete. The Hidden Gardens remain open in Free Mode.","returnAtlas":"Return to atlas","musicOnAria":"Turn off background music","musicOffAria":"Turn on background music","musicTitle":"Generative ambience","muteOnAria":"Turn all sound on","muteOffAria":"Mute all sound","muteTitle":"Mute all sound","volumeGroup":"Sound controls","backgroundVolumeAria":"Background music volume","instrumentVolumeAria":"Instrument and puzzle volume","resetAria":"Reset progress","resetTitle":"Reset progress","mapAria":"Journey map","worldAria":"Pitch puzzle","creatorName":"Adrian Janitra Putra","creatorHint":"Assembled while the mind hovered slightly above concert pitch.","creatorAria":"About the creator"},"de":{"pageTitle":"Echo Atlas — Mehrsprachige Edition","brandEyebrow":"Eine Kartografie des Hörens","activeArea":"Aktiver Bereich","soundAtlas":"Klangatlas","worldScales":"Tonleitern der Welt","hiddenGardens":"Verborgene Gärten","pitchPuzzle":"Tonhöhen-Puzzle","toneSystem":"Tonsystem","switchScale":"Skala wechseln","journey":"Reise","ambience":"Atmosphäre","instrument":"Instrument","freeMode":"FREIER MODUS","hiddenGarden":"VERBORGENER GARTEN","stage":"Stufe {stage} / 04","switchScaleCount":"Skala wechseln · {current}/{total}","oneScale":"Eine Skala","freeModifier":"Kein Ziel. Berühre beliebige Töne oder spiele die Skala auf- und abwärts.","blindModifier":"Während der Wiedergabe bleibt das Licht verborgen. Vertraue deinen Ohren.","normalModifier":"Antworte in derselben Reihenfolge.","playSpace":"Spiele den Raum.","noWrong":"Im freien Modus gibt es keine falschen Antworten.","pressListen":"Drücke auf Hören.","nextTrace":"Der Raum spielt seine nächste Spur.","listen":"Hören","playScale":"Skala spielen","repeat":"Wiederholen","openGate":"Tor öffnen","listenAgain":"Noch einmal hören","freeModeButton":"Freier Modus","challengeModeButton":"Challenge-Modus","freeModeActive":"Freier Modus aktiv","challengeModeActive":"Challenge-Modus aktiv","sequenceListen":"Höre dem Raum zu.","blindListen":"Das Licht bleibt verborgen. Merke dir nur den Klang.","sequenceForm":"Lass das Muster entstehen, bevor du antwortest.","answerNow":"Jetzt antworte.","answerBody":"Berühre die Echos in der richtigen Reihenfolge.","reverseTitle":"Kehre das Echo um.","reverseBody":"Beginne mit dem zuletzt gehörten Ton.","rootCent":"Grundton · 0 Cent","aboveRoot":"{cents} Cent über dem Grundton","continue":"Weiter.","echoesLeft":"Noch {count} Echos.","traceBroken":"Die Spur ist zerbrochen","nearly":"Fast.","repeatRoom":"Der Raum wiederholt sich.","stageDone":"Stufe {stage} abgeschlossen","traceStored":"Spur gespeichert.","nextRoomOpening":"Der nächste Raum öffnet sich.","areaDone":"Bereich abgeschlossen.","areaNowOpen":"{area} ist jetzt geöffnet.","gateOpened":"Ein neues Tor hat sich geöffnet","atlasComplete":"Atlas vollständig.","atlasCompleteBody":"Du hast bis in die kleinsten Zwischenräume der Töne gehört.","scaleMoves":"Die Skala bewegt sich.","scaleMovesBody":"Höre, wie ihre Form aufsteigt und nach Hause zurückkehrt.","freeTouch":"Berühre einen beliebigen Ton. Es gibt keine falschen Antworten.","explore":"erkunden","backgroundOn":"Hintergrundmusik eingeschaltet","backgroundOff":"Hintergrundmusik ausgeschaltet","soundOn":"Ton eingeschaltet","soundOff":"Ton ausgeschaltet","ambienceVolume":"Atmosphäre {value}%","instrumentVolume":"Instrument {value}%","resetConfirm":"Den gesamten Fortschritt von Echo Atlas löschen?","atlasReset":"Atlas zurückgesetzt","toneLabel":"Ton {label}","splashTag":"Ein musikalisches Puzzle für Kopfhörer","splashLead":"Erkunde Tonleitern aus aller Welt als Puzzle oder öffne den freien Modus, um alle Regionen und Verborgenen Gärten ohne richtige oder falsche Antworten zu spielen.","startJourney":"Reise beginnen","freeExplore":"Frei erkunden","splashSmall":"Challenge speichert den Fortschritt · der freie Modus öffnet den gesamten Atlas · zwölf Klanggärten bewegen sich als ineinanderfließendes Ambient-Ritual","finaleTag":"Atlas vollständig","finaleTitle":"Du bist angekommen<br>zwischen den Tönen.","finaleBody":"Verändert hat sich nicht nur die Schwierigkeit, sondern auch die Art, wie dein Ohr Abstände teilt. Der Hauptweg des Puzzles ist abgeschlossen. Die Verborgenen Gärten bleiben im freien Modus geöffnet.","returnAtlas":"Zum Atlas zurückkehren","musicOnAria":"Hintergrundmusik ausschalten","musicOffAria":"Hintergrundmusik einschalten","musicTitle":"Generative Atmosphäre","muteOnAria":"Alle Töne einschalten","muteOffAria":"Alle Töne stummschalten","muteTitle":"Alle Töne stummschalten","volumeGroup":"Klangeinstellungen","backgroundVolumeAria":"Lautstärke der Hintergrundmusik","instrumentVolumeAria":"Lautstärke von Instrument und Puzzle","resetAria":"Fortschritt zurücksetzen","resetTitle":"Fortschritt zurücksetzen","mapAria":"Reisekarte","worldAria":"Tonhöhen-Puzzle","creatorName":"Adrian Janitra Putra","creatorHint":"Zusammengebaut, während der Kopf etwas über dem Kammerton schwebte.","creatorAria":"Über den Schöpfer"}};
+      const LOCALIZED_STRINGS = {
+        id: {},
+        en: {"Diatonis · cahaya pertama":"Diatonic · first light","Jepang · taman kabut":"Japan · garden of mist","Indonesia · logam dan tanah":"Indonesia · metal and earth","India · fajar dan dengung":"India · dawn and drone","Dua belas nada · kaca malam":"Twelve tones · night glass","Mikrotonal · batas yang larut":"Microtonal · dissolving boundaries","Baja yang berbisik":"Whispering steel","Bara analog yang tertinggal":"Lingering analog embers","Cahaya yang mudah diingat":"A light that remembers","Arus beludru di malam hari":"A velvet current at night","Ruang kosong dan gravitasi rendah":"Empty space and low gravity","Kabut spektral yang bergerak":"Moving spectral mist","Diatonis":"Diatonic","Kromatis":"Chromatic","Mayor diatonis":"Diatonic major","Hirajōshi terinspirasi":"Hirajōshi-inspired","Sléndro terinspirasi":"Sléndro-inspired","Pélog terinspirasi":"Pélog-inspired","Bhairav terinspirasi":"Bhairav-inspired","Kromatis 12-TET":"12-TET chromatic","Mikrotonal 24-TET":"24-TET microtonal","Mayor / Ionian":"Major / Ionian","Minor natural / Aeolian":"Natural minor / Aeolian","In scale terinspirasi":"In-scale inspired","Yaman terinspirasi":"Yaman-inspired","Mixolydian pop":"Pop Mixolydian","Harmonic minor synth":"Synth harmonic minor","Interval yang terang dan familiar. Perjalanan dimulai dari jarak nada yang mudah dibaca.":"Bright, familiar intervals begin the journey with distances that are easy to hear.","Lima nada dengan ruang yang lebar dan tarikan semiton. Warna nadanya makin rapat, tetapi urutan tetap dibaca seperti biasa.":"Five tones with wide spaces and semitone tension. The color grows denser, while the order remains straightforward.","Jarak lima nada yang relatif merata membuka jalan menuju warna pélog yang lebih tajam dan tidak simetris.":"Five relatively even steps lead toward the sharper, asymmetrical color of pélog.","Tujuh posisi nada dengan jarak yang tidak merata. Ini adalah interpretasi sintetis, bukan penyetelan gamelan tertentu.":"Seven unevenly spaced tones. This is a synthetic interpretation, not a reproduction of a specific gamelan tuning.","Nada kedua dan keenam yang rendah menciptakan tegangan khas. Dengung dasar tetap hidup di belakang melodi.":"Lowered second and sixth degrees create a distinctive tension while the fundamental drone remains beneath the melody.","Setiap langkah hanya berjarak satu semiton. Perbedaan mengecil, jumlah pilihan membesar, dan tempo mulai menekan.":"Every step is only one semitone apart. Differences shrink, choices multiply, and the pace begins to press.","Setengah dari semiton biasa. Beberapa nada terasa hampir sama; telinga harus mengingat arah, warna, dan gesekan.":"Half the size of a usual semitone. Some tones feel almost identical; the ear must remember direction, color, and friction.","Phrygian dominant dipertahankan sebagai arsitektur gelap, tetapi hadir melalui resonansi synth seperti baja yang jauh.":"Phrygian dominant remains as a dark architecture, heard through synth resonance like distant steel.","Minor pentatonic menjadi jejak rock yang samar, dibawa oleh synth analog hangat dan interval fifth yang terbuka.":"Minor pentatonic becomes a faint rock trace, carried by warm analog synths and open fifths.","Major pentatonic muncul sebagai serpihan melodi yang mudah diingat, tetapi larut dalam pad dan gema.":"Major pentatonic appears as memorable melodic fragments that dissolve into pads and echoes.","Dorian memberi warna hangat dan ambigu melalui chord panjang, overtone lembut, dan ruang yang luas.":"Dorian brings warm ambiguity through long chords, soft overtones, and open space.","Natural minor hadir melalui sub-bass yang bernapas, jeda panjang, dan fragmen bunyi seperti ingatan akan sample.":"Natural minor emerges through breathing sub-bass, long pauses, and fragments that resemble remembered samples.","Whole tone menciptakan gerak tanpa pusat melalui spektrum, filter lambat, dan kilau sintetis yang tipis.":"Whole tone creates centerless motion through spectra, slow filters, and a thin synthetic shimmer.","Mayor diatonis lengkap: terang, stabil, dan familiar.":"A complete diatonic major scale: bright, stable, and familiar.","Versi minor dengan derajat ketiga, keenam, dan ketujuh yang lebih rendah.":"A minor form with lowered third, sixth, and seventh degrees.","Pentatonik Jepang dengan tarikan semiton dan lompatan lebar.":"A Japanese pentatonic color with semitone tension and wide leaps.","Warna pentatonik gelap dengan dua pasangan nada yang berdekatan.":"A darker pentatonic color with two pairs of adjacent tones.","Lima posisi dengan jarak relatif merata, disintesis sebagai pendekatan eksploratif.":"Five relatively even positions, synthesized as an exploratory approximation.","Jarak tidak merata dengan tegangan yang lebih tajam; bukan replika laras gamelan tertentu.":"Uneven spacing with sharper tension; not a replica of any particular gamelan tuning.","Komal Re dan komal Dha memberi tegangan kuat di sekitar Sa dan Pa.":"Komal Re and komal Dha create strong tension around Sa and Pa.","Warna terang dengan Ma yang dinaikkan, dimainkan di atas dengung Sa.":"A luminous color with raised Ma, played above a Sa drone.","Semiton dan mayor ketiga memberi bayangan dramatis, dirender sebagai resonansi sintetis yang tenang.":"The semitone and major third cast a dramatic shadow, rendered as calm synthetic resonance.","Leading tone tinggi memberi tarikan dramatis tanpa perlu menjadi riff yang literal.":"A raised leading tone creates dramatic pull without becoming a literal riff.","Kerangka rock yang dikenali hanya dari arah frase dan ruang di antara nadanya.":"A rock-shaped framework recognized only through phrasing and the space between tones.","Blue note menjadi noda kecil di dalam tekstur analog yang lembut.":"The blue note becomes a small stain within a soft analog texture.","Lima nada konsonan untuk hook yang langsung terbaca.":"Five consonant tones for an immediately legible hook.","Mayor dengan ♭7 untuk warna anthem yang sedikit lebih terbuka.":"Major with a ♭7 for a more open, anthem-like color.","Minor dengan mayor keenam, memberi rasa lembut tetapi tidak sepenuhnya muram.":"Minor with a major sixth, gentle without becoming entirely dark.","Fondasi ringkas untuk frase vokal, bass, dan ornamentasi soulful.":"A compact foundation for vocal phrases, bass, and soulful ornamentation.","Kerangka minor stabil untuk loop dan 808 bassline.":"A stable minor framework for loops and 808 bass lines.","Minor dengan ♭2 untuk beat yang lebih tegang dan gelap.":"Minor with a ♭2 for a darker, more tense pulse.","Jarak seragam menciptakan sensasi mengambang dan futuristik.":"Equal spacing creates a floating, futuristic sensation.","Minor dramatis untuk arpeggio, synthwave, dan garis lead yang tegang.":"Dramatic minor for arpeggios, synthwave, and tense lead lines."},
+        de: {"Diatonis · cahaya pertama":"Diatonisch · erstes Licht","Jepang · taman kabut":"Japan · Garten im Nebel","Indonesia · logam dan tanah":"Indonesien · Metall und Erde","India · fajar dan dengung":"Indien · Morgendämmerung und Bordun","Dua belas nada · kaca malam":"Zwölf Töne · nächtliches Glas","Mikrotonal · batas yang larut":"Mikrotonal · sich auflösende Grenzen","Baja yang berbisik":"Flüsternder Stahl","Bara analog yang tertinggal":"Nachglühende analoge Funken","Cahaya yang mudah diingat":"Ein Licht, das sich erinnert","Arus beludru di malam hari":"Ein samtener Strom bei Nacht","Ruang kosong dan gravitasi rendah":"Leerer Raum und geringe Schwerkraft","Kabut spektral yang bergerak":"Wandernder spektraler Nebel","Diatonis":"Diatonisch","Kromatis":"Chromatisch","Mayor diatonis":"Diatonisches Dur","Hirajōshi terinspirasi":"Von Hirajōshi inspiriert","Sléndro terinspirasi":"Von Sléndro inspiriert","Pélog terinspirasi":"Von Pélog inspiriert","Bhairav terinspirasi":"Von Bhairav inspiriert","Kromatis 12-TET":"Chromatisch in 12-TET","Mikrotonal 24-TET":"Mikrotonal in 24-TET","Mayor / Ionian":"Dur / Ionisch","Minor natural / Aeolian":"Natürliches Moll / Äolisch","In scale terinspirasi":"Von der In-Skala inspiriert","Yaman terinspirasi":"Von Yaman inspiriert","Mixolydian pop":"Pop-Mixolydisch","Harmonic minor synth":"Synthetisches harmonisches Moll","Interval yang terang dan familiar. Perjalanan dimulai dari jarak nada yang mudah dibaca.":"Helle, vertraute Intervalle eröffnen die Reise mit leicht hörbaren Tonabständen.","Lima nada dengan ruang yang lebar dan tarikan semiton. Warna nadanya makin rapat, tetapi urutan tetap dibaca seperti biasa.":"Fünf Töne mit weiten Räumen und Halbtonspannung. Die Klangfarbe wird dichter, die Reihenfolge bleibt jedoch direkt lesbar.","Jarak lima nada yang relatif merata membuka jalan menuju warna pélog yang lebih tajam dan tidak simetris.":"Fünf relativ gleichmäßige Abstände führen zur schärferen, asymmetrischen Farbe von Pélog.","Tujuh posisi nada dengan jarak yang tidak merata. Ini adalah interpretasi sintetis, bukan penyetelan gamelan tertentu.":"Sieben ungleich verteilte Tonpositionen. Dies ist eine synthetische Interpretation und keine Nachbildung einer bestimmten Gamelan-Stimmung.","Nada kedua dan keenam yang rendah menciptakan tegangan khas. Dengung dasar tetap hidup di belakang melodi.":"Die erniedrigte zweite und sechste Stufe erzeugen eine charakteristische Spannung, während der Grundbordun unter der Melodie weiterklingt.","Setiap langkah hanya berjarak satu semiton. Perbedaan mengecil, jumlah pilihan membesar, dan tempo mulai menekan.":"Jeder Schritt liegt nur einen Halbton entfernt. Die Unterschiede schrumpfen, die Auswahl wächst und das Tempo beginnt zu drängen.","Setengah dari semiton biasa. Beberapa nada terasa hampir sama; telinga harus mengingat arah, warna, dan gesekan.":"Die Hälfte eines gewöhnlichen Halbtons. Manche Töne wirken fast gleich; das Ohr muss sich Richtung, Farbe und Reibung merken.","Phrygian dominant dipertahankan sebagai arsitektur gelap, tetapi hadir melalui resonansi synth seperti baja yang jauh.":"Phrygisch-dominant bleibt als dunkle Architektur erhalten und erscheint als Synth-Resonanz wie ferner Stahl.","Minor pentatonic menjadi jejak rock yang samar, dibawa oleh synth analog hangat dan interval fifth yang terbuka.":"Die Moll-Pentatonik wird zu einer vagen Rock-Spur, getragen von warmen analogen Synths und offenen Quinten.","Major pentatonic muncul sebagai serpihan melodi yang mudah diingat, tetapi larut dalam pad dan gema.":"Die Dur-Pentatonik erscheint als einprägsame Melodiefragmente, die sich in Flächen und Echos auflösen.","Dorian memberi warna hangat dan ambigu melalui chord panjang, overtone lembut, dan ruang yang luas.":"Dorisch erzeugt warme Mehrdeutigkeit durch lange Akkorde, sanfte Obertöne und weiten Raum.","Natural minor hadir melalui sub-bass yang bernapas, jeda panjang, dan fragmen bunyi seperti ingatan akan sample.":"Natürliches Moll erscheint durch atmenden Subbass, lange Pausen und Klangfragmente wie Erinnerungen an Samples.","Whole tone menciptakan gerak tanpa pusat melalui spektrum, filter lambat, dan kilau sintetis yang tipis.":"Die Ganztonleiter erzeugt Bewegung ohne Zentrum durch Spektren, langsame Filter und einen feinen synthetischen Schimmer.","Mayor diatonis lengkap: terang, stabil, dan familiar.":"Eine vollständige diatonische Durtonleiter: hell, stabil und vertraut.","Versi minor dengan derajat ketiga, keenam, dan ketujuh yang lebih rendah.":"Eine Mollform mit erniedrigter dritter, sechster und siebter Stufe.","Pentatonik Jepang dengan tarikan semiton dan lompatan lebar.":"Japanische Pentatonik mit Halbtonspannung und weiten Sprüngen.","Warna pentatonik gelap dengan dua pasangan nada yang berdekatan.":"Eine dunklere pentatonische Farbe mit zwei Paaren benachbarter Töne.","Lima posisi dengan jarak relatif merata, disintesis sebagai pendekatan eksploratif.":"Fünf relativ gleichmäßig verteilte Positionen als explorative synthetische Annäherung.","Jarak tidak merata dengan tegangan yang lebih tajam; bukan replika laras gamelan tertentu.":"Ungleichmäßige Abstände mit schärferer Spannung; keine Nachbildung einer bestimmten Gamelan-Stimmung.","Komal Re dan komal Dha memberi tegangan kuat di sekitar Sa dan Pa.":"Komal Re und komal Dha erzeugen starke Spannung um Sa und Pa.","Warna terang dengan Ma yang dinaikkan, dimainkan di atas dengung Sa.":"Eine helle Farbe mit erhöhtem Ma über einem Sa-Bordun.","Semiton dan mayor ketiga memberi bayangan dramatis, dirender sebagai resonansi sintetis yang tenang.":"Halbton und große Terz werfen einen dramatischen Schatten, umgesetzt als ruhige synthetische Resonanz.","Leading tone tinggi memberi tarikan dramatis tanpa perlu menjadi riff yang literal.":"Ein erhöhter Leitton erzeugt dramatischen Zug, ohne zu einem wörtlichen Riff zu werden.","Kerangka rock yang dikenali hanya dari arah frase dan ruang di antara nadanya.":"Eine Rock-Kontur, die nur an der Phrasierung und den Räumen zwischen den Tönen erkennbar ist.","Blue note menjadi noda kecil di dalam tekstur analog yang lembut.":"Die Blue Note wird zu einem kleinen Fleck in einer weichen analogen Textur.","Lima nada konsonan untuk hook yang langsung terbaca.":"Fünf konsonante Töne für eine unmittelbar erkennbare Hook.","Mayor dengan ♭7 untuk warna anthem yang sedikit lebih terbuka.":"Dur mit ♭7 für eine offenere, hymnische Farbe.","Minor dengan mayor keenam, memberi rasa lembut tetapi tidak sepenuhnya muram.":"Moll mit großer Sexte, sanft, aber nicht vollständig düster.","Fondasi ringkas untuk frase vokal, bass, dan ornamentasi soulful.":"Eine kompakte Grundlage für Gesangsphrasen, Bass und soulvolle Verzierungen.","Kerangka minor stabil untuk loop dan 808 bassline.":"Ein stabiles Mollgerüst für Loops und 808-Basslinien.","Minor dengan ♭2 untuk beat yang lebih tegang dan gelap.":"Moll mit ♭2 für einen dunkleren und gespannteren Puls.","Jarak seragam menciptakan sensasi mengambang dan futuristik.":"Gleichmäßige Abstände erzeugen ein schwebendes, futuristisches Gefühl.","Minor dramatis untuk arpeggio, synthwave, dan garis lead yang tegang.":"Dramatisches Moll für Arpeggien, Synthwave und gespannte Lead-Linien."}
+      };
+
+      function loadLanguage() {
+        try {
+          const saved = localStorage.getItem(LANGUAGE_KEY);
+          if (["id", "en", "de"].includes(saved)) return saved;
+        } catch {}
+        const browser = (navigator.language || "").toLowerCase();
+        if (browser.startsWith("de")) return "de";
+        if (browser.startsWith("en")) return "en";
+        return "id";
+      }
+
+      let currentLang = loadLanguage();
+
+      function t(key, vars = {}) {
+        const table = UI_TEXT[currentLang] || UI_TEXT.id;
+        let value = table[key] ?? UI_TEXT.id[key] ?? key;
+        Object.entries(vars).forEach(([name, replacement]) => {
+          value = value.replaceAll(`{${name}}`, String(replacement));
+        });
+        return value;
+      }
+
+      function localizeText(value) {
+        return LOCALIZED_STRINGS[currentLang]?.[value] || value;
+      }
+
+      const areas = [
+        {
+          id: "lumen",
+          glyph: "I",
+          title: "Lumen",
+          subtitle: "Diatonis · cahaya pertama",
+          mapLabel: "Diatonis",
+          scaleName: "Mayor diatonis",
+          scaleText: "Interval yang terang dan familiar. Perjalanan dimulai dari jarak nada yang mudah dibaca.",
+          noteLabels: ["1", "2", "3", "4", "5", "6", "7"],
+          cents: [0, 200, 400, 500, 700, 900, 1100],
+          freeScales: [
+            { name: "Mayor / Ionian", text: "Mayor diatonis lengkap: terang, stabil, dan familiar.", labels: ["1", "2", "3", "4", "5", "6", "7"], cents: [0, 200, 400, 500, 700, 900, 1100] },
+            { name: "Minor natural / Aeolian", text: "Versi minor dengan derajat ketiga, keenam, dan ketujuh yang lebih rendah.", labels: ["1", "2", "♭3", "4", "5", "♭6", "♭7"], cents: [0, 200, 300, 500, 700, 800, 1000] }
+          ],
+          root: 220,
+          instrument: "glass",
+          colors: {
+            accent: "213, 224, 255",
+            accent2: "134, 159, 210",
+            orb: "202, 216, 255",
+            a: "rgba(51, 63, 102, .30)",
+            b: "rgba(23, 40, 62, .16)"
+          },
+          lengths: [3, 4, 5, 6],
+          speeds: [720, 660, 610, 560],
+          mode: ["normal", "normal", "normal", "normal"],
+          toneCounts: [4, 5, 6, 7]
+        },
+        {
+          id: "kiri",
+          glyph: "II",
+          title: "Kiri no Niwa",
+          subtitle: "Jepang · taman kabut",
+          mapLabel: "Hirajōshi",
+          scaleName: "Hirajōshi terinspirasi",
+          scaleText: "Lima nada dengan ruang yang lebar dan tarikan semiton. Warna nadanya makin rapat, tetapi urutan tetap dibaca seperti biasa.",
+          noteLabels: ["1", "2", "♭3", "5", "♭6"],
+          cents: [0, 200, 300, 700, 800],
+          freeScales: [
+            { name: "Hirajōshi terinspirasi", text: "Pentatonik Jepang dengan tarikan semiton dan lompatan lebar.", labels: ["1", "2", "♭3", "5", "♭6"], cents: [0, 200, 300, 700, 800] },
+            { name: "In scale terinspirasi", text: "Warna pentatonik gelap dengan dua pasangan nada yang berdekatan.", labels: ["1", "♭2", "4", "5", "♭6"], cents: [0, 100, 500, 700, 800] }
+          ],
+          root: 246.94,
+          instrument: "koto",
+          colors: {
+            accent: "226, 211, 224",
+            accent2: "180, 142, 170",
+            orb: "233, 203, 222",
+            a: "rgba(89, 60, 83, .30)",
+            b: "rgba(42, 49, 64, .18)"
+          },
+          lengths: [4, 5, 6, 7],
+          speeds: [680, 620, 590, 550],
+          mode: ["normal", "normal", "normal", "normal"],
+          toneCounts: [5, 5, 5, 5]
+        },
+        {
+          id: "nusa",
+          glyph: "III",
+          title: "Nusa Resonansi",
+          subtitle: "Indonesia · logam dan tanah",
+          mapLabel: "Sléndro / Pélog",
+          scaleName: "Sléndro terinspirasi",
+          scaleText: "Jarak lima nada yang relatif merata membuka jalan menuju warna pélog yang lebih tajam dan tidak simetris.",
+          noteLabels: ["1", "2", "3", "5", "6"],
+          cents: [0, 240, 480, 720, 960],
+          alternate: {
+            fromStage: 3,
+            scaleName: "Pélog terinspirasi",
+            scaleText: "Tujuh posisi nada dengan jarak yang tidak merata. Ini adalah interpretasi sintetis, bukan penyetelan gamelan tertentu.",
+            noteLabels: ["1", "2", "3", "4", "5", "6", "7"],
+            cents: [0, 150, 350, 550, 700, 900, 1050]
+          },
+          freeScales: [
+            { name: "Sléndro terinspirasi", text: "Lima posisi dengan jarak relatif merata, disintesis sebagai pendekatan eksploratif.", labels: ["1", "2", "3", "5", "6"], cents: [0, 240, 480, 720, 960] },
+            { name: "Pélog terinspirasi", text: "Jarak tidak merata dengan tegangan yang lebih tajam; bukan replika laras gamelan tertentu.", labels: ["1", "2", "3", "4", "5", "6", "7"], cents: [0, 150, 350, 550, 700, 900, 1050] }
+          ],
+          root: 196,
+          instrument: "gamelan",
+          colors: {
+            accent: "236, 207, 137",
+            accent2: "165, 112, 64",
+            orb: "239, 194, 112",
+            a: "rgba(104, 68, 28, .32)",
+            b: "rgba(47, 54, 34, .17)"
+          },
+          lengths: [5, 6, 7, 8],
+          speeds: [650, 600, 560, 520],
+          mode: ["normal", "normal", "normal", "normal"],
+          toneCounts: [5, 5, 6, 7]
+        },
+        {
+          id: "surya",
+          glyph: "IV",
+          title: "Surya Raga",
+          subtitle: "India · fajar dan dengung",
+          mapLabel: "Bhairav",
+          scaleName: "Bhairav terinspirasi",
+          scaleText: "Nada kedua dan keenam yang rendah menciptakan tegangan khas. Dengung dasar tetap hidup di belakang melodi.",
+          noteLabels: ["Sa", "r", "Ga", "Ma", "Pa", "d", "Ni"],
+          cents: [0, 100, 400, 500, 700, 800, 1100],
+          freeScales: [
+            { name: "Bhairav terinspirasi", text: "Komal Re dan komal Dha memberi tegangan kuat di sekitar Sa dan Pa.", labels: ["Sa", "r", "Ga", "Ma", "Pa", "d", "Ni"], cents: [0, 100, 400, 500, 700, 800, 1100] },
+            { name: "Yaman terinspirasi", text: "Warna terang dengan Ma yang dinaikkan, dimainkan di atas dengung Sa.", labels: ["Sa", "Re", "Ga", "M+", "Pa", "Dha", "Ni"], cents: [0, 200, 400, 600, 700, 900, 1100] }
+          ],
+          root: 174.61,
+          instrument: "raga",
+          colors: {
+            accent: "244, 181, 126",
+            accent2: "177, 69, 55",
+            orb: "247, 169, 112",
+            a: "rgba(112, 48, 35, .31)",
+            b: "rgba(84, 67, 28, .17)"
+          },
+          lengths: [5, 6, 7, 8],
+          speeds: [650, 610, 570, 540],
+          mode: ["normal", "normal", "blind", "blind"],
+          toneCounts: [6, 7, 7, 7]
+        },
+        {
+          id: "chrome",
+          glyph: "V",
+          title: "Kota Kromatik",
+          subtitle: "Dua belas nada · kaca malam",
+          mapLabel: "Kromatis",
+          scaleName: "Kromatis 12-TET",
+          scaleText: "Setiap langkah hanya berjarak satu semiton. Perbedaan mengecil, jumlah pilihan membesar, dan tempo mulai menekan.",
+          noteLabels: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+          cents: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100],
+          root: 220,
+          instrument: "chrome",
+          colors: {
+            accent: "151, 231, 224",
+            accent2: "76, 122, 158",
+            orb: "139, 229, 226",
+            a: "rgba(24, 94, 104, .27)",
+            b: "rgba(35, 43, 87, .20)"
+          },
+          lengths: [6, 7, 8, 9],
+          speeds: [540, 500, 460, 420],
+          mode: ["normal", "normal", "normal", "blind"],
+          toneCounts: [8, 9, 10, 12]
+        },
+        {
+          id: "between",
+          glyph: "VI",
+          title: "Antara Nada",
+          subtitle: "Mikrotonal · batas yang larut",
+          mapLabel: "24-TET",
+          scaleName: "Mikrotonal 24-TET",
+          scaleText: "Setengah dari semiton biasa. Beberapa nada terasa hampir sama; telinga harus mengingat arah, warna, dan gesekan.",
+          noteLabels: ["0", "½", "1½", "2½", "4", "5½", "7", "8½", "10", "11½"],
+          cents: [0, 50, 150, 250, 400, 550, 700, 850, 1000, 1150],
+          root: 207.65,
+          instrument: "micro",
+          colors: {
+            accent: "194, 165, 255",
+            accent2: "89, 164, 181",
+            orb: "203, 177, 255",
+            a: "rgba(72, 45, 112, .32)",
+            b: "rgba(19, 79, 92, .19)"
+          },
+          lengths: [6, 8, 10, 12],
+          speeds: [500, 455, 420, 385],
+          mode: ["normal", "blind", "blind", "blind"],
+          toneCounts: [7, 8, 9, 10]
+        },
+        {
+          id: "metal",
+          category: "bonus",
+          glyph: "VII",
+          title: "Iron Cathedral",
+          subtitle: "Baja yang berbisik",
+          mapLabel: "Steel resonance",
+          scaleName: "Phrygian dominant",
+          scaleText: "Phrygian dominant dipertahankan sebagai arsitektur gelap, tetapi hadir melalui resonansi synth seperti baja yang jauh.",
+          noteLabels: ["1", "♭2", "3", "4", "5", "♭6", "♭7"],
+          cents: [0, 100, 400, 500, 700, 800, 1000],
+          freeScales: [
+            { name: "Phrygian dominant", text: "Semiton dan mayor ketiga memberi bayangan dramatis, dirender sebagai resonansi sintetis yang tenang.", labels: ["1", "♭2", "3", "4", "5", "♭6", "♭7"], cents: [0, 100, 400, 500, 700, 800, 1000] },
+            { name: "Harmonic minor", text: "Leading tone tinggi memberi tarikan dramatis tanpa perlu menjadi riff yang literal.", labels: ["1", "2", "♭3", "4", "5", "♭6", "7"], cents: [0, 200, 300, 500, 700, 800, 1100] }
+          ],
+          root: 110,
+          instrument: "metal",
+          colors: { accent: "235, 112, 97", accent2: "111, 40, 48", orb: "244, 126, 105", a: "rgba(108, 31, 37, .34)", b: "rgba(52, 45, 53, .22)" },
+          lengths: [4, 5, 6, 7], speeds: [620, 570, 520, 470], mode: ["normal", "normal", "normal", "normal"], toneCounts: [5, 6, 7, 7]
+        },
+        {
+          id: "rock",
+          category: "bonus",
+          glyph: "VIII",
+          title: "Garage Ember",
+          subtitle: "Bara analog yang tertinggal",
+          mapLabel: "Analog embers",
+          scaleName: "Minor pentatonic",
+          scaleText: "Minor pentatonic menjadi jejak rock yang samar, dibawa oleh synth analog hangat dan interval fifth yang terbuka.",
+          noteLabels: ["1", "♭3", "4", "5", "♭7"],
+          cents: [0, 300, 500, 700, 1000],
+          freeScales: [
+            { name: "Minor pentatonic", text: "Kerangka rock yang dikenali hanya dari arah frase dan ruang di antara nadanya.", labels: ["1", "♭3", "4", "5", "♭7"], cents: [0, 300, 500, 700, 1000] },
+            { name: "Blues hexatonic", text: "Blue note menjadi noda kecil di dalam tekstur analog yang lembut.", labels: ["1", "♭3", "4", "♭5", "5", "♭7"], cents: [0, 300, 500, 600, 700, 1000] }
+          ],
+          root: 146.83,
+          instrument: "rock",
+          colors: { accent: "241, 177, 98", accent2: "128, 74, 43", orb: "245, 187, 108", a: "rgba(105, 58, 24, .32)", b: "rgba(68, 48, 42, .19)" },
+          lengths: [4, 5, 6, 7], speeds: [640, 590, 540, 500], mode: ["normal", "normal", "normal", "normal"], toneCounts: [5, 5, 6, 6]
+        },
+        {
+          id: "pop",
+          category: "bonus",
+          glyph: "IX",
+          title: "Prism FM",
+          subtitle: "Cahaya yang mudah diingat",
+          mapLabel: "Lucent memory",
+          scaleName: "Major pentatonic",
+          scaleText: "Major pentatonic muncul sebagai serpihan melodi yang mudah diingat, tetapi larut dalam pad dan gema.",
+          noteLabels: ["1", "2", "3", "5", "6"],
+          cents: [0, 200, 400, 700, 900],
+          freeScales: [
+            { name: "Major pentatonic", text: "Lima nada konsonan untuk hook yang langsung terbaca.", labels: ["1", "2", "3", "5", "6"], cents: [0, 200, 400, 700, 900] },
+            { name: "Mixolydian pop", text: "Mayor dengan ♭7 untuk warna anthem yang sedikit lebih terbuka.", labels: ["1", "2", "3", "4", "5", "6", "♭7"], cents: [0, 200, 400, 500, 700, 900, 1000] }
+          ],
+          root: 261.63,
+          instrument: "pop",
+          colors: { accent: "255, 157, 218", accent2: "109, 125, 238", orb: "255, 174, 225", a: "rgba(120, 42, 99, .28)", b: "rgba(46, 59, 118, .21)" },
+          lengths: [4, 5, 6, 7], speeds: [660, 610, 560, 520], mode: ["normal", "normal", "normal", "normal"], toneCounts: [5, 5, 6, 7]
+        },
+        {
+          id: "rnb",
+          category: "bonus",
+          glyph: "X",
+          title: "Velvet Hours",
+          subtitle: "Arus beludru di malam hari",
+          mapLabel: "Velvet current",
+          scaleName: "Dorian",
+          scaleText: "Dorian memberi warna hangat dan ambigu melalui chord panjang, overtone lembut, dan ruang yang luas.",
+          noteLabels: ["1", "2", "♭3", "4", "5", "6", "♭7"],
+          cents: [0, 200, 300, 500, 700, 900, 1000],
+          freeScales: [
+            { name: "Dorian", text: "Minor dengan mayor keenam, memberi rasa lembut tetapi tidak sepenuhnya muram.", labels: ["1", "2", "♭3", "4", "5", "6", "♭7"], cents: [0, 200, 300, 500, 700, 900, 1000] },
+            { name: "Minor pentatonic", text: "Fondasi ringkas untuk frase vokal, bass, dan ornamentasi soulful.", labels: ["1", "♭3", "4", "5", "♭7"], cents: [0, 300, 500, 700, 1000] }
+          ],
+          root: 196,
+          instrument: "rnb",
+          colors: { accent: "185, 139, 255", accent2: "79, 64, 127", orb: "198, 159, 255", a: "rgba(75, 40, 112, .31)", b: "rgba(38, 41, 72, .22)" },
+          lengths: [4, 5, 6, 7], speeds: [680, 630, 580, 540], mode: ["normal", "normal", "normal", "normal"], toneCounts: [5, 6, 7, 7]
+        },
+        {
+          id: "hiphop",
+          category: "bonus",
+          glyph: "XI",
+          title: "Low Orbit",
+          subtitle: "Ruang kosong dan gravitasi rendah",
+          mapLabel: "Sub gravity",
+          scaleName: "Natural minor",
+          scaleText: "Natural minor hadir melalui sub-bass yang bernapas, jeda panjang, dan fragmen bunyi seperti ingatan akan sample.",
+          noteLabels: ["1", "2", "♭3", "4", "5", "♭6", "♭7"],
+          cents: [0, 200, 300, 500, 700, 800, 1000],
+          freeScales: [
+            { name: "Natural minor", text: "Kerangka minor stabil untuk loop dan 808 bassline.", labels: ["1", "2", "♭3", "4", "5", "♭6", "♭7"], cents: [0, 200, 300, 500, 700, 800, 1000] },
+            { name: "Phrygian", text: "Minor dengan ♭2 untuk beat yang lebih tegang dan gelap.", labels: ["1", "♭2", "♭3", "4", "5", "♭6", "♭7"], cents: [0, 100, 300, 500, 700, 800, 1000] }
+          ],
+          root: 82.41,
+          instrument: "hiphop",
+          colors: { accent: "113, 220, 167", accent2: "45, 98, 89", orb: "126, 232, 177", a: "rgba(27, 91, 69, .30)", b: "rgba(24, 45, 57, .23)" },
+          lengths: [4, 5, 6, 7], speeds: [700, 640, 590, 540], mode: ["normal", "normal", "normal", "normal"], toneCounts: [5, 6, 7, 7]
+        },
+        {
+          id: "electronic",
+          category: "bonus",
+          glyph: "XII",
+          title: "Neon Assembly",
+          subtitle: "Kabut spektral yang bergerak",
+          mapLabel: "Spectral mist",
+          scaleName: "Whole tone",
+          scaleText: "Whole tone menciptakan gerak tanpa pusat melalui spektrum, filter lambat, dan kilau sintetis yang tipis.",
+          noteLabels: ["0", "2", "4", "6", "8", "10"],
+          cents: [0, 200, 400, 600, 800, 1000],
+          freeScales: [
+            { name: "Whole tone", text: "Jarak seragam menciptakan sensasi mengambang dan futuristik.", labels: ["0", "2", "4", "6", "8", "10"], cents: [0, 200, 400, 600, 800, 1000] },
+            { name: "Harmonic minor synth", text: "Minor dramatis untuk arpeggio, synthwave, dan garis lead yang tegang.", labels: ["1", "2", "♭3", "4", "5", "♭6", "7"], cents: [0, 200, 300, 500, 700, 800, 1100] }
+          ],
+          root: 130.81,
+          instrument: "electronic",
+          colors: { accent: "92, 231, 255", accent2: "83, 70, 214", orb: "106, 238, 255", a: "rgba(22, 92, 119, .31)", b: "rgba(49, 36, 112, .23)" },
+          lengths: [4, 5, 6, 7], speeds: [590, 540, 490, 440], mode: ["normal", "normal", "normal", "normal"], toneCounts: [6, 6, 7, 7]
+        }
+      ];
+
+      const dom = {
+        canvas: document.getElementById("field"),
+        map: document.getElementById("map"),
+        tones: document.getElementById("tones"),
+        areaTitle: document.getElementById("areaTitle"),
+        areaSubtitle: document.getElementById("areaSubtitle"),
+        stageLabel: document.getElementById("stageLabel"),
+        instruction: document.getElementById("instruction"),
+        subtext: document.getElementById("subtext"),
+        listeningDot: document.getElementById("listeningDot"),
+        scaleName: document.getElementById("scaleName"),
+        scaleText: document.getElementById("scaleText"),
+        scaleNotes: document.getElementById("scaleNotes"),
+        scaleButton: document.getElementById("scaleButton"),
+        modifier: document.getElementById("modifier"),
+        mainButton: document.getElementById("mainButton"),
+        modeButton: document.getElementById("modeButton"),
+        musicButton: document.getElementById("musicButton"),
+        soundButton: document.getElementById("soundButton"),
+        volumePanel: document.getElementById("volumePanel"),
+        backgroundVolumeSlider: document.getElementById("backgroundVolumeSlider"),
+        backgroundVolumeValue: document.getElementById("backgroundVolumeValue"),
+        instrumentVolumeSlider: document.getElementById("instrumentVolumeSlider"),
+        instrumentVolumeValue: document.getElementById("instrumentVolumeValue"),
+        resetButton: document.getElementById("resetButton"),
+        journeyLabel: document.getElementById("journeyLabel"),
+        journeyBar: document.getElementById("journeyBar"),
+        splash: document.getElementById("splash"),
+        enterChallenge: document.getElementById("enterChallenge"),
+        enterFree: document.getElementById("enterFree"),
+        toast: document.getElementById("toast"),
+        flash: document.getElementById("flash"),
+        finale: document.getElementById("finale"),
+        closeFinale: document.getElementById("closeFinale"),
+        languageButtons: [...document.querySelectorAll("#languageSwitch button")],
+        brandEyebrow: document.getElementById("brandEyebrow"),
+        activeAreaLabel: document.getElementById("activeAreaLabel"),
+        toneSystemLabel: document.getElementById("toneSystemLabel"),
+        ambienceLabel: document.getElementById("ambienceLabel"),
+        instrumentLabel: document.getElementById("instrumentLabel"),
+        journeyTitle: document.getElementById("journeyTitle"),
+        splashTag: document.getElementById("splashTag"),
+        splashLead: document.getElementById("splashLead"),
+        splashSmall: document.getElementById("splashSmall"),
+        finaleTag: document.getElementById("finaleTag"),
+        finaleTitle: document.getElementById("finaleTitle"),
+        finaleBody: document.getElementById("finaleBody"),
+        creatorMark: document.getElementById("creatorMark"),
+        creatorTrigger: document.getElementById("creatorTrigger"),
+        creatorName: document.getElementById("creatorName"),
+        creatorHint: document.getElementById("creatorHint")
+      };
+
+      let state = loadState();
+      let areaIndex = Math.min(state.selectedArea, state.unlockedArea);
+      let stage = getStartStage(areaIndex);
+      let sequence = [];
+      let expected = [];
+      let userStep = 0;
+      let accepting = false;
+      let playing = false;
+      let waitingForGate = false;
+      let muted = false;
+      let backgroundVolume = loadChannelVolume(BACKGROUND_VOLUME_KEY, .55);
+      let instrumentVolume = loadChannelVolume(INSTRUMENT_VOLUME_KEY, .82);
+      let audioCtx = null;
+      let master = null;
+      let instrumentBus = null;
+      let backgroundBus = null;
+      let convolver = null;
+      let backgroundConvolver = null;
+      let droneBus = null;
+      let droneNodes = [];
+      let toastTimer = null;
+      let gameMode = "challenge";
+      let freeScaleIndex = Array(areas.length).fill(0);
+
+      // Generative lounge/house soundtrack.
+      let atlasEntered = false;
+      let backgroundEnabled = true;
+      let backgroundDeck = null;
+      let backgroundDuck = 1;
+      let backgroundNoise = null;
+      const backgroundDecks = new Set();
+
+      function defaultState() {
+        return {
+          unlockedArea: 0,
+          selectedArea: 0,
+          completed: [0, 0, 0, 0, 0, 0],
+          finaleSeen: false
+        };
+      }
+
+      function loadState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved || !Array.isArray(saved.completed)) return defaultState();
+          return {
+            unlockedArea: Math.max(0, Math.min(CHALLENGE_AREA_COUNT - 1, Number(saved.unlockedArea) || 0)),
+            selectedArea: Math.max(0, Math.min(CHALLENGE_AREA_COUNT - 1, Number(saved.selectedArea) || 0)),
+            completed: Array.from({ length: CHALLENGE_AREA_COUNT }, (_, i) => Math.max(0, Math.min(STAGES_PER_AREA, Number(saved.completed[i]) || 0))),
+            finaleSeen: Boolean(saved.finaleSeen)
+          };
+        } catch {
+          return defaultState();
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch {
+          // Game tetap berjalan jika penyimpanan browser diblokir.
+        }
+      }
+
+      function loadChannelVolume(key, fallback) {
+        try {
+          const own = Number(localStorage.getItem(key));
+          if (Number.isFinite(own)) return Math.max(0, Math.min(1, own));
+
+          const legacy = Number(localStorage.getItem(LEGACY_VOLUME_KEY));
+          if (Number.isFinite(legacy)) return Math.max(0, Math.min(1, legacy));
+        } catch {
+          // Fallback ke nilai bawaan.
+        }
+        return fallback;
+      }
+
+      function saveChannelVolume(key, value) {
+        try {
+          localStorage.setItem(key, String(value));
+        } catch {
+          // Abaikan jika browser memblokir storage.
+        }
+      }
+
+      function currentMasterTarget() {
+        return muted ? .0001 : .78;
+      }
+
+      function soundGlyph() {
+        const audibleLevel = Math.max(backgroundVolume, instrumentVolume);
+        if (muted || audibleLevel <= .01) return "○";
+        if (audibleLevel < .35) return "◔";
+        if (audibleLevel < .7) return "◑";
+        return "◖";
+      }
+
+      function updateVolumeUi() {
+        const backgroundPct = Math.round(backgroundVolume * 100);
+        const instrumentPct = Math.round(instrumentVolume * 100);
+
+        if (dom.backgroundVolumeSlider) dom.backgroundVolumeSlider.value = String(backgroundPct);
+        if (dom.instrumentVolumeSlider) dom.instrumentVolumeSlider.value = String(instrumentPct);
+        if (dom.backgroundVolumeValue) dom.backgroundVolumeValue.textContent = `${backgroundPct}%`;
+        if (dom.instrumentVolumeValue) dom.instrumentVolumeValue.textContent = `${instrumentPct}%`;
+
+        if (dom.soundButton) {
+          dom.soundButton.textContent = soundGlyph();
+          dom.soundButton.setAttribute(
+            "aria-label",
+            muted ? t("muteOnAria") : t("muteOffAria")
+          );
+        }
+      }
+
+      function applyMasterGain() {
+        if (!master || !audioCtx) return;
+        master.gain.cancelScheduledValues(audioCtx.currentTime);
+        master.gain.setTargetAtTime(currentMasterTarget(), audioCtx.currentTime, .04);
+      }
+
+      function applyChannelGains() {
+        if (!audioCtx) return;
+
+        if (backgroundBus) {
+          backgroundBus.gain.cancelScheduledValues(audioCtx.currentTime);
+          backgroundBus.gain.setTargetAtTime(
+            Math.max(.0001, backgroundVolume),
+            audioCtx.currentTime,
+            .04
+          );
+        }
+
+        if (instrumentBus) {
+          instrumentBus.gain.cancelScheduledValues(audioCtx.currentTime);
+          instrumentBus.gain.setTargetAtTime(
+            Math.max(.0001, instrumentVolume),
+            audioCtx.currentTime,
+            .04
+          );
+        }
+      }
+
+      function getStartStage(index) {
+        const done = Number(state.completed[index]) || 0;
+        return done >= STAGES_PER_AREA ? 1 : done + 1;
+      }
+
+      function localizeScale(scale) {
+        return {
+          ...scale,
+          name: localizeText(scale.name),
+          text: localizeText(scale.text)
+        };
+      }
+
+      function getFreeScales(area) {
+        const source = Array.isArray(area.freeScales) && area.freeScales.length
+          ? area.freeScales
+          : (() => {
+              const variants = [{ name: area.scaleName, text: area.scaleText, labels: area.noteLabels, cents: area.cents }];
+              if (area.alternate) {
+                variants.push({
+                  name: area.alternate.scaleName,
+                  text: area.alternate.scaleText,
+                  labels: area.alternate.noteLabels,
+                  cents: area.alternate.cents
+                });
+              }
+              return variants;
+            })();
+        return source.map(localizeScale);
+      }
+
+      function getAreaScale(area, currentStage) {
+        if (gameMode === "free") {
+          const variants = getFreeScales(area);
+          const chosen = variants[freeScaleIndex[areaIndex] % variants.length];
+          return { cents: chosen.cents, labels: chosen.labels, name: chosen.name, text: chosen.text };
+        }
+        if (area.alternate && currentStage >= area.alternate.fromStage) {
+          return localizeScale({
+            cents: area.alternate.cents,
+            labels: area.alternate.noteLabels,
+            name: area.alternate.scaleName,
+            text: area.alternate.scaleText
+          });
+        }
+        return localizeScale({
+          cents: area.cents,
+          labels: area.noteLabels,
+          name: area.scaleName,
+          text: area.scaleText
+        });
+      }
+
+      function applyStaticLanguage() {
+        document.documentElement.lang = currentLang;
+        document.title = t("pageTitle");
+        dom.languageButtons.forEach(button => {
+          button.classList.toggle("active", button.dataset.lang === currentLang);
+          button.setAttribute("aria-pressed", String(button.dataset.lang === currentLang));
+        });
+
+        dom.brandEyebrow.textContent = t("brandEyebrow");
+        dom.activeAreaLabel.textContent = t("activeArea");
+        dom.toneSystemLabel.textContent = t("toneSystem");
+        dom.ambienceLabel.textContent = t("ambience");
+        dom.instrumentLabel.textContent = t("instrument");
+        dom.journeyTitle.textContent = t("journey");
+
+        dom.map.setAttribute("aria-label", t("mapAria"));
+        document.querySelector(".world").setAttribute("aria-label", t("worldAria"));
+        document.querySelector(".volume-cradle").setAttribute("aria-label", t("volumeGroup"));
+        dom.backgroundVolumeSlider.setAttribute("aria-label", t("backgroundVolumeAria"));
+        dom.instrumentVolumeSlider.setAttribute("aria-label", t("instrumentVolumeAria"));
+        dom.musicButton.title = t("musicTitle");
+        dom.musicButton.setAttribute("aria-label", backgroundEnabled ? t("musicOnAria") : t("musicOffAria"));
+        dom.soundButton.title = t("muteTitle");
+        dom.resetButton.title = t("resetTitle");
+        dom.resetButton.setAttribute("aria-label", t("resetAria"));
+
+        dom.splashTag.textContent = t("splashTag");
+        dom.splashLead.textContent = t("splashLead");
+        dom.enterChallenge.textContent = t("startJourney");
+        dom.enterFree.textContent = t("freeExplore");
+        dom.splashSmall.textContent = t("splashSmall");
+
+        dom.finaleTag.textContent = t("finaleTag");
+        dom.finaleTitle.innerHTML = t("finaleTitle");
+        dom.finaleBody.textContent = t("finaleBody");
+        dom.closeFinale.textContent = t("returnAtlas");
+
+        dom.creatorName.textContent = t("creatorName");
+        dom.creatorHint.textContent = t("creatorHint");
+        dom.creatorTrigger.setAttribute("aria-label", t("creatorAria"));
+      }
+
+      function refreshLocalizedArea() {
+        const area = areas[areaIndex];
+        const scale = getAreaScale(area, stage);
+        const variants = getFreeScales(area);
+
+        dom.areaTitle.textContent = area.title;
+        dom.areaSubtitle.textContent = localizeText(area.subtitle);
+        dom.stageLabel.textContent = gameMode === "free"
+          ? `${area.category === "bonus" ? t("hiddenGarden") : t("freeMode")} · ${String((freeScaleIndex[areaIndex] % variants.length) + 1).padStart(2, "0")} / ${String(variants.length).padStart(2, "0")}`
+          : t("stage", { stage: String(stage).padStart(2, "0") });
+        dom.scaleName.textContent = scale.name;
+        dom.scaleText.textContent = scale.text;
+
+        dom.scaleButton.textContent = variants.length > 1
+          ? t("switchScaleCount", { current: (freeScaleIndex[areaIndex] % variants.length) + 1, total: variants.length })
+          : t("oneScale");
+
+        dom.modeButton.textContent = gameMode === "free" ? t("challengeModeButton") : t("freeModeButton");
+
+        if (gameMode === "free") {
+          dom.modifier.innerHTML = `<b>∞</b><span>${t("freeModifier")}</span>`;
+        } else if (area.mode[stage - 1] === "blind") {
+          dom.modifier.innerHTML = `<b>◌</b><span>${t("blindModifier")}</span>`;
+        } else {
+          dom.modifier.innerHTML = `<b>→</b><span>${t("normalModifier")}</span>`;
+        }
+
+        [...dom.tones.children].forEach((button, index) => {
+          button.setAttribute("aria-label", t("toneLabel", { label: scale.labels[index] || index + 1 }));
+        });
+
+        if (waitingForGate) dom.mainButton.textContent = t("openGate");
+        else if (gameMode === "free") dom.mainButton.textContent = t("playScale");
+        else if (accepting) dom.mainButton.textContent = t("repeat");
+        else dom.mainButton.textContent = t("listen");
+      }
+
+      function setLanguage(language) {
+        if (!["id", "en", "de"].includes(language)) return;
+        currentLang = language;
+        try { localStorage.setItem(LANGUAGE_KEY, currentLang); } catch {}
+        applyStaticLanguage();
+        buildMap();
+        refreshLocalizedArea();
+        updateJourney();
+        updateVolumeUi();
+      }
+
+      function init() {
+        applyStaticLanguage();
+        updateVolumeUi();
+        buildMap();
+        renderArea();
+        updateJourney();
+        initField();
+        requestAnimationFrame(drawField);
+      }
+
+      function buildMap() {
+        dom.map.innerHTML = `<p class="map-title">${t("soundAtlas")}</p>`;
+
+        areas.forEach((area, i) => {
+          if (i === 0 || i === CHALLENGE_AREA_COUNT) {
+            const section = document.createElement("p");
+            section.className = "map-section";
+            section.textContent = i === 0 ? t("worldScales") : t("hiddenGardens");
+            dom.map.appendChild(section);
+          }
+
+          const button = document.createElement("button");
+          button.className = "map-node";
+          if (area.category === "bonus") button.classList.add("bonus", "free-only");
+          button.dataset.index = i;
+
+          const lockedChallenge = gameMode === "challenge" && (i >= CHALLENGE_AREA_COUNT || i > state.unlockedArea);
+          button.disabled = lockedChallenge;
+          if (i === areaIndex) button.classList.add("active");
+
+          const completed = Number(state.completed[i]) || 0;
+          if (i < CHALLENGE_AREA_COUNT && completed >= STAGES_PER_AREA) button.classList.add("complete");
+
+          const dots = i < CHALLENGE_AREA_COUNT
+            ? Array.from({ length: STAGES_PER_AREA }, (_, d) => `<i class="${d < completed ? "done" : ""}"></i>`).join("")
+            : "";
+          const sublabel = i >= CHALLENGE_AREA_COUNT && gameMode === "challenge"
+            ? t("freeMode")
+            : localizeText(area.mapLabel);
+
+          button.innerHTML = `
+            <span class="sigil">${area.glyph}</span>
+            <span class="map-copy">
+              <strong>${area.title}</strong>
+              <span>${sublabel}</span>
+              ${dots ? `<span class="stage-dots">${dots}</span>` : ""}
+            </span>
+          `;
+
+          button.addEventListener("click", () => selectArea(i));
+          dom.map.appendChild(button);
+        });
+      }
+
+      function selectArea(index) {
+        const blocked = gameMode === "challenge" && (index >= CHALLENGE_AREA_COUNT || index > state.unlockedArea);
+        if (blocked || playing) return;
+        areaIndex = index;
+        if (index < CHALLENGE_AREA_COUNT) state.selectedArea = index;
+        stage = gameMode === "free" ? 1 : getStartStage(index);
+        waitingForGate = false;
+        accepting = gameMode === "free";
+        sequence = [];
+        expected = [];
+        userStep = 0;
+        saveState();
+        stopDrone();
+        buildMap();
+        renderArea();
+        startDrone();
+        transitionBackgroundMusic();
+        showToast(areas[index].title);
+      }
+
+      function setGameMode(mode, announce = true) {
+        if (playing) return;
+        gameMode = mode === "free" ? "free" : "challenge";
+        document.body.classList.toggle("free-mode", gameMode === "free");
+        dom.modeButton.classList.toggle("active", gameMode === "free");
+        dom.modeButton.textContent = gameMode === "free" ? t("challengeModeButton") : t("freeModeButton");
+
+        if (gameMode === "challenge" && (areaIndex >= CHALLENGE_AREA_COUNT || areaIndex > state.unlockedArea)) {
+          areaIndex = Math.min(state.selectedArea, state.unlockedArea, CHALLENGE_AREA_COUNT - 1);
+        }
+        stage = gameMode === "free" ? 1 : getStartStage(areaIndex);
+        sequence = [];
+        expected = [];
+        accepting = gameMode === "free";
+        waitingForGate = false;
+        stopDrone();
+        buildMap();
+        renderArea();
+        updateJourney();
+        startDrone();
+        transitionBackgroundMusic();
+        if (announce) showToast(gameMode === "free" ? t("freeModeActive") : t("challengeModeActive"));
+      }
+
+      function renderArea() {
+        stage = Math.max(1, Math.min(STAGES_PER_AREA, Number(stage) || 1));
+        const area = areas[areaIndex];
+        const scale = getAreaScale(area, stage);
+        const variants = getFreeScales(area);
+        const root = document.documentElement.style;
+
+        root.setProperty("--accent", area.colors.accent);
+        root.setProperty("--accent2", area.colors.accent2);
+        root.setProperty("--orb", area.colors.orb);
+        root.setProperty("--scene-a", area.colors.a);
+        root.setProperty("--scene-b", area.colors.b);
+
+        dom.areaTitle.textContent = area.title;
+        dom.areaSubtitle.textContent = localizeText(area.subtitle);
+        dom.stageLabel.textContent = gameMode === "free"
+          ? `${area.category === "bonus" ? t("hiddenGarden") : t("freeMode")} · ${String((freeScaleIndex[areaIndex] % variants.length) + 1).padStart(2, "0")} / ${String(variants.length).padStart(2, "0")}`
+          : t("stage", { stage: String(stage).padStart(2, "0") });
+        dom.scaleName.textContent = scale.name;
+        dom.scaleText.textContent = scale.text;
+        dom.scaleNotes.innerHTML = scale.labels.map(label => `<span>${label}</span>`).join("");
+
+        dom.scaleButton.classList.toggle("visible", gameMode === "free" && variants.length > 1);
+        dom.scaleButton.textContent = variants.length > 1
+          ? t("switchScaleCount", { current: (freeScaleIndex[areaIndex] % variants.length) + 1, total: variants.length })
+          : t("oneScale");
+
+        if (gameMode === "free") {
+          dom.modifier.innerHTML = `<b>∞</b><span>${t("freeModifier")}</span>`;
+          buildTones();
+          accepting = true;
+          setCopy(t("playSpace"), t("noWrong"));
+          dom.mainButton.textContent = t("playScale");
+          dom.mainButton.disabled = false;
+          return;
+        }
+
+        const mode = area.mode[stage - 1];
+        if (mode === "blind") {
+          dom.modifier.innerHTML = `<b>◌</b><span>${t("blindModifier")}</span>`;
+        } else {
+          dom.modifier.innerHTML = `<b>→</b><span>${t("normalModifier")}</span>`;
+        }
+
+        buildTones();
+        accepting = false;
+        setCopy(t("pressListen"), t("nextTrace"));
+        dom.mainButton.textContent = t("listen");
+        dom.mainButton.disabled = false;
+      }
+
+      function buildTones() {
+        dom.tones.innerHTML = "";
+        const area = areas[areaIndex];
+        const scale = getAreaScale(area, stage);
+        const challengeCount = area.toneCounts?.[stage - 1] || scale.cents.length;
+        const count = gameMode === "free" ? scale.cents.length : Math.min(challengeCount, scale.cents.length);
+        const offset = count >= 10 ? -90 : -90 - 180 / count;
+
+        for (let i = 0; i < count; i++) {
+          const button = document.createElement("button");
+          button.className = "tone";
+          button.dataset.index = i;
+          button.setAttribute("aria-label", t("toneLabel", { label: scale.labels[i] || i + 1 }));
+          const angle = offset + (360 / count) * i;
+          button.style.setProperty("--angle", `${angle}deg`);
+          button.style.setProperty("--counter", `${-angle}deg`);
+          button.innerHTML = `<span class="tone-label">${scale.labels[i] || i + 1}</span>`;
+          button.addEventListener("pointerdown", () => handleTone(i));
+          dom.tones.appendChild(button);
+        }
+      }
+
+      async function initAudio() {
+        if (audioCtx) return;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+
+        master = audioCtx.createGain();
+        master.gain.value = currentMasterTarget();
+        master.connect(audioCtx.destination);
+
+        instrumentBus = audioCtx.createGain();
+        instrumentBus.gain.value = Math.max(.0001, instrumentVolume);
+        instrumentBus.connect(master);
+
+        backgroundBus = audioCtx.createGain();
+        backgroundBus.gain.value = Math.max(.0001, backgroundVolume);
+        backgroundBus.connect(master);
+
+        convolver = audioCtx.createConvolver();
+        convolver.buffer = createImpulse(2.8, 2.6);
+        const instrumentWet = audioCtx.createGain();
+        instrumentWet.gain.value = .30;
+        convolver.connect(instrumentWet).connect(instrumentBus);
+
+        backgroundConvolver = audioCtx.createConvolver();
+        backgroundConvolver.buffer = createImpulse(3.8, 3.0);
+        const backgroundWet = audioCtx.createGain();
+        backgroundWet.gain.value = .32;
+        backgroundConvolver.connect(backgroundWet).connect(backgroundBus);
+      }
+
+      function createImpulse(duration, decay) {
+        const length = audioCtx.sampleRate * duration;
+        const buffer = audioCtx.createBuffer(2, length, audioCtx.sampleRate);
+
+        for (let c = 0; c < 2; c++) {
+          const data = buffer.getChannelData(c);
+          for (let i = 0; i < length; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+          }
+        }
+        return buffer;
+      }
+
+      function centsToFreq(root, cents) {
+        return root * Math.pow(2, cents / 1200);
+      }
+
+      function currentFrequency(index) {
+        const area = areas[areaIndex];
+        const scale = getAreaScale(area, stage);
+        return centsToFreq(area.root, scale.cents[index]);
+      }
+
+      function envelope(gain, now, peak, duration, attack = .012, releaseTail = 0) {
+        gain.gain.setValueAtTime(.0001, now);
+        gain.gain.exponentialRampToValueAtTime(Math.max(.0002, peak), now + attack);
+        gain.gain.exponentialRampToValueAtTime(.0001, now + duration + releaseTail);
+      }
+
+      function connectDryWet(source, dryAmount = 1, wetAmount = .25) {
+        const dry = audioCtx.createGain();
+        const wet = audioCtx.createGain();
+        dry.gain.value = dryAmount;
+        wet.gain.value = wetAmount;
+        source.connect(dry).connect(instrumentBus);
+        source.connect(wet).connect(convolver);
+      }
+
+      function playTone(index, duration = .62, visual = true) {
+        if (visual) animateTone(index, duration);
+        if (!audioCtx || muted) return;
+
+        const area = areas[areaIndex];
+        const freq = currentFrequency(index);
+        const now = audioCtx.currentTime;
+
+        if (area.instrument === "glass") playGlass(freq, duration, now);
+        else if (area.instrument === "koto") playKoto(freq, duration, now);
+        else if (area.instrument === "gamelan") playGamelan(freq, duration, now);
+        else if (area.instrument === "raga") playRaga(freq, duration, now);
+        else if (area.instrument === "chrome") playChrome(freq, duration, now);
+        else if (area.instrument === "metal") playMetal(freq, duration, now);
+        else if (area.instrument === "rock") playRock(freq, duration, now);
+        else if (area.instrument === "pop") playPop(freq, duration, now);
+        else if (area.instrument === "rnb") playRnb(freq, duration, now);
+        else if (area.instrument === "hiphop") playHipHop(freq, duration, now);
+        else if (area.instrument === "electronic") playElectronic(freq, duration, now);
+        else playMicro(freq, duration, now);
+      }
+
+      function playGlass(freq, duration, now) {
+        const mix = audioCtx.createGain();
+        const gain = audioCtx.createGain();
+        envelope(gain, now, .23, duration, .015, .12);
+
+        [1, 2.01].forEach((ratio, i) => {
+          const osc = audioCtx.createOscillator();
+          const partial = audioCtx.createGain();
+          osc.type = i ? "sine" : "triangle";
+          osc.frequency.value = freq * ratio;
+          partial.gain.value = i ? .13 : .9;
+          osc.connect(partial).connect(mix);
+          osc.start(now);
+          osc.stop(now + duration + .25);
+        });
+
+        mix.connect(gain);
+        connectDryWet(gain, 1, .38);
+      }
+
+      function playKoto(freq, duration, now) {
+        const osc = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freq * 1.015, now);
+        osc.frequency.exponentialRampToValueAtTime(freq, now + .045);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(2800, now);
+        filter.frequency.exponentialRampToValueAtTime(900, now + duration);
+        filter.Q.value = 4.5;
+        envelope(gain, now, .26, duration, .004, .06);
+        osc.connect(filter).connect(gain);
+        connectDryWet(gain, 1, .26);
+        osc.start(now);
+        osc.stop(now + duration + .15);
+
+        const click = audioCtx.createBufferSource();
+        click.buffer = noiseBuffer(.035);
+        const clickFilter = audioCtx.createBiquadFilter();
+        const clickGain = audioCtx.createGain();
+        clickFilter.type = "bandpass";
+        clickFilter.frequency.value = Math.min(5000, freq * 5);
+        clickFilter.Q.value = 1.1;
+        envelope(clickGain, now, .055, .03, .001);
+        click.connect(clickFilter).connect(clickGain).connect(instrumentBus);
+        click.start(now);
+      }
+
+      function playGamelan(freq, duration, now) {
+        const carrier = audioCtx.createOscillator();
+        const mod = audioCtx.createOscillator();
+        const modGain = audioCtx.createGain();
+        const out = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        carrier.type = "sine";
+        carrier.frequency.value = freq;
+        mod.type = "sine";
+        mod.frequency.value = freq * 1.414;
+        modGain.gain.value = freq * .68;
+        mod.connect(modGain).connect(carrier.frequency);
+
+        filter.type = "bandpass";
+        filter.frequency.value = Math.min(7000, freq * 3.2);
+        filter.Q.value = .7;
+        envelope(out, now, .22, duration, .004, .5);
+        carrier.connect(filter).connect(out);
+        connectDryWet(out, .92, .48);
+
+        carrier.start(now);
+        mod.start(now);
+        carrier.stop(now + duration + .65);
+        mod.stop(now + duration + .65);
+      }
+
+      function playRaga(freq, duration, now) {
+        const osc = audioCtx.createOscillator();
+        const soft = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        osc.type = "sawtooth";
+        soft.type = "sine";
+        osc.frequency.setValueAtTime(freq * .985, now);
+        osc.frequency.exponentialRampToValueAtTime(freq, now + .11);
+        soft.frequency.setValueAtTime(freq, now);
+
+        filter.type = "lowpass";
+        filter.frequency.value = 1200;
+        filter.Q.value = 1.4;
+        envelope(gain, now, .15, duration + .1, .045, .18);
+
+        const softGain = audioCtx.createGain();
+        softGain.gain.value = .75;
+        osc.connect(filter);
+        soft.connect(softGain).connect(filter);
+        filter.connect(gain);
+        connectDryWet(gain, .95, .34);
+
+        osc.start(now);
+        soft.start(now);
+        osc.stop(now + duration + .4);
+        soft.stop(now + duration + .4);
+      }
+
+      function playChrome(freq, duration, now) {
+        const osc = audioCtx.createOscillator();
+        const sub = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        osc.type = "square";
+        sub.type = "sine";
+        osc.frequency.value = freq;
+        sub.frequency.value = freq * .5;
+        filter.type = "lowpass";
+        filter.frequency.value = 1700 + freq;
+        filter.Q.value = 2;
+        envelope(gain, now, .14, Math.min(duration, .46), .006, .02);
+
+        const subGain = audioCtx.createGain();
+        subGain.gain.value = .38;
+        osc.connect(filter);
+        sub.connect(subGain).connect(filter);
+        filter.connect(gain);
+        connectDryWet(gain, 1, .19);
+
+        osc.start(now);
+        sub.start(now);
+        osc.stop(now + duration + .08);
+        sub.stop(now + duration + .08);
+      }
+
+      function playMicro(freq, duration, now) {
+        const mix = audioCtx.createGain();
+        const gain = audioCtx.createGain();
+        envelope(gain, now, .16, duration, .025, .28);
+
+        [-4.5, 0, 4.5].forEach((detune, i) => {
+          const osc = audioCtx.createOscillator();
+          const partial = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = freq * (i === 2 ? 2 : 1);
+          osc.detune.value = detune;
+          partial.gain.value = i === 2 ? .12 : .52;
+          osc.connect(partial).connect(mix);
+          osc.start(now);
+          osc.stop(now + duration + .4);
+        });
+
+        mix.connect(gain);
+        connectDryWet(gain, .82, .53);
+      }
+
+
+      function distortionCurve(amount = 45) {
+        const samples = 22050;
+        const curve = new Float32Array(samples);
+        const k = amount;
+        for (let i = 0; i < samples; i++) {
+          const x = i * 2 / samples - 1;
+          curve[i] = (3 + k) * x * 20 * Math.PI / (Math.PI + k * Math.abs(x));
+        }
+        return curve;
+      }
+
+      function playMetal(freq, duration, now) {
+        // A quiet "steel memory": no guitar model and no distortion.
+        const mix = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        const partials = [
+          { ratio: .5, level: .20, detune: -3 },
+          { ratio: 1, level: .62, detune: 0 },
+          { ratio: 1.498, level: .17, detune: 2 },
+          { ratio: 2.72, level: .055, detune: -2 }
+        ];
+
+        partials.forEach((partial, i) => {
+          const osc = audioCtx.createOscillator();
+          const voice = audioCtx.createGain();
+          osc.type = i < 2 ? "sine" : "triangle";
+          osc.frequency.value = freq * partial.ratio;
+          osc.detune.value = partial.detune;
+          voice.gain.value = partial.level;
+          osc.connect(voice).connect(mix);
+          osc.start(now);
+          osc.stop(now + duration + .72);
+        });
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(1900, now);
+        filter.frequency.exponentialRampToValueAtTime(720, now + duration + .3);
+        filter.Q.value = 1.1;
+
+        envelope(gain, now, .082, duration + .22, .028, .40);
+        mix.connect(filter).connect(gain);
+        connectDryWet(gain, .70, .48);
+      }
+
+      function playRock(freq, duration, now) {
+        // Warm analog fifths: an homage to open rock harmony, not a guitar.
+        const mix = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        [
+          { ratio: 1, type: "triangle", level: .58, detune: -3 },
+          { ratio: 1.5, type: "sine", level: .20, detune: 3 },
+          { ratio: 2, type: "sine", level: .10, detune: 0 }
+        ].forEach(voiceData => {
+          const osc = audioCtx.createOscillator();
+          const voice = audioCtx.createGain();
+          osc.type = voiceData.type;
+          osc.frequency.value = freq * voiceData.ratio;
+          osc.detune.value = voiceData.detune;
+          voice.gain.value = voiceData.level;
+          osc.connect(voice).connect(mix);
+          osc.start(now);
+          osc.stop(now + duration + .55);
+        });
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(2300, now);
+        filter.frequency.exponentialRampToValueAtTime(880, now + duration);
+        filter.Q.value = .75;
+        envelope(gain, now, .092, duration + .18, .045, .32);
+
+        mix.connect(filter).connect(gain);
+        connectDryWet(gain, .74, .40);
+      }
+
+      function playPop(freq, duration, now) {
+        const mix = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        [
+          { ratio: 1, level: .66, type: "sine" },
+          { ratio: 2, level: .14, type: "triangle" },
+          { ratio: 3.01, level: .045, type: "sine" }
+        ].forEach((voiceData, i) => {
+          const osc = audioCtx.createOscillator();
+          const voice = audioCtx.createGain();
+          osc.type = voiceData.type;
+          osc.frequency.value = freq * voiceData.ratio;
+          osc.detune.value = i === 1 ? 3 : 0;
+          voice.gain.value = voiceData.level;
+          osc.connect(voice).connect(mix);
+          osc.start(now);
+          osc.stop(now + duration + .55);
+        });
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(3400, now);
+        filter.frequency.exponentialRampToValueAtTime(1200, now + duration + .15);
+        filter.Q.value = 1.3;
+        envelope(gain, now, .092, duration + .12, .022, .32);
+
+        mix.connect(filter).connect(gain);
+        connectDryWet(gain, .70, .46);
+      }
+
+      function playRnb(freq, duration, now) {
+        const carrier = audioCtx.createOscillator();
+        const mod = audioCtx.createOscillator();
+        const modGain = audioCtx.createGain();
+        const tone = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        carrier.type = "sine";
+        mod.type = "sine";
+        carrier.frequency.value = freq;
+        mod.frequency.value = freq * 2;
+        modGain.gain.setValueAtTime(freq * .38, now);
+        modGain.gain.exponentialRampToValueAtTime(.001, now + .42);
+        mod.connect(modGain).connect(carrier.frequency);
+
+        tone.type = "lowpass";
+        tone.frequency.value = 2050;
+        tone.Q.value = .55;
+        envelope(gain, now, .108, duration + .25, .036, .42);
+
+        carrier.connect(tone).connect(gain);
+        connectDryWet(gain, .66, .54);
+        carrier.start(now);
+        mod.start(now);
+        carrier.stop(now + duration + .72);
+        mod.stop(now + duration + .72);
+      }
+
+      function playHipHop(freq, duration, now) {
+        // Sub as breath, with a faint dusty overtone rather than a hard 808 hit.
+        const sub = audioCtx.createOscillator();
+        const overtone = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        const overtoneGain = audioCtx.createGain();
+
+        sub.type = "sine";
+        overtone.type = "triangle";
+        sub.frequency.setValueAtTime(freq * 1.08, now);
+        sub.frequency.exponentialRampToValueAtTime(freq, now + .11);
+        overtone.frequency.value = freq * 2;
+        overtoneGain.gain.value = .09;
+
+        filter.type = "lowpass";
+        filter.frequency.value = 680;
+        filter.Q.value = .65;
+        envelope(gain, now, .115, duration + .30, .026, .44);
+
+        sub.connect(filter);
+        overtone.connect(overtoneGain).connect(filter);
+        filter.connect(gain);
+        connectDryWet(gain, .82, .22);
+
+        sub.start(now);
+        overtone.start(now);
+        sub.stop(now + duration + .78);
+        overtone.stop(now + duration + .78);
+      }
+
+      function playElectronic(freq, duration, now) {
+        const mix = audioCtx.createGain();
+        const spectralFilter = audioCtx.createBiquadFilter();
+        const bodyFilter = audioCtx.createBiquadFilter();
+        const spectralGain = audioCtx.createGain();
+        const bodyGain = audioCtx.createGain();
+        const output = audioCtx.createGain();
+
+        [-6, 0, 6].forEach((detune, i) => {
+          const osc = audioCtx.createOscillator();
+          const voice = audioCtx.createGain();
+          osc.type = i === 1 ? "triangle" : "sine";
+          osc.frequency.value = freq * (i === 2 ? 2 : 1);
+          osc.detune.value = detune;
+          voice.gain.value = i === 2 ? .16 : .52;
+          osc.connect(voice).connect(mix);
+          osc.start(now);
+          osc.stop(now + duration + .76);
+        });
+
+        // Moving spectral halo.
+        spectralFilter.type = "bandpass";
+        spectralFilter.frequency.setValueAtTime(760, now);
+        spectralFilter.frequency.exponentialRampToValueAtTime(2900, now + duration * .55);
+        spectralFilter.frequency.exponentialRampToValueAtTime(1050, now + duration + .34);
+        spectralFilter.Q.value = 2.15;
+        envelope(spectralGain, now, .092, duration + .20, .035, .48);
+
+        // Parallel body path so the instrument remains clearly audible.
+        bodyFilter.type = "lowpass";
+        bodyFilter.frequency.setValueAtTime(2450, now);
+        bodyFilter.frequency.exponentialRampToValueAtTime(1380, now + duration + .28);
+        bodyFilter.Q.value = .58;
+        envelope(bodyGain, now, .082, duration + .22, .028, .46);
+
+        output.gain.value = 1;
+        mix.connect(spectralFilter).connect(spectralGain).connect(output);
+        mix.connect(bodyFilter).connect(bodyGain).connect(output);
+
+        connectDryWet(output, .80, .52);
+      }
+
+      function noiseBuffer(duration) {
+        const length = Math.max(1, Math.floor(audioCtx.sampleRate * duration));
+        const buffer = audioCtx.createBuffer(1, length, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+        return buffer;
+      }
+
+
+      function getBackgroundNoise() {
+        if (backgroundNoise) return backgroundNoise;
+        const length = audioCtx.sampleRate;
+        backgroundNoise = audioCtx.createBuffer(1, length, audioCtx.sampleRate);
+        const data = backgroundNoise.getChannelData(0);
+        for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+        return backgroundNoise;
+      }
+
+      function getMusicProfile(area) {
+        const profiles = {
+          lumen: {
+            bpm: 58, volume: .155, cutoff: 3900,
+            progression: [0, 3, 4, 0], chord: [0, 2, 4],
+            style: "lumen", chordEveryBars: 2, chordLengthSteps: 31,
+            pulseSteps: [0, 8], pulseEveryBars: 2,
+            gestureSteps: [6, 14], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          kiri: {
+            bpm: 54, volume: .145, cutoff: 3300,
+            progression: [0, 3, 1, 0], chord: [0, 2],
+            style: "kiri", chordEveryBars: 2, chordLengthSteps: 30,
+            pulseSteps: [0], pulseEveryBars: 2,
+            gestureSteps: [5, 13], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          nusa: {
+            bpm: 60, volume: .145, cutoff: 4200,
+            progression: [0, 3, 2, 4], chord: [0, 2, 4],
+            style: "nusa", chordEveryBars: 2, chordLengthSteps: 30,
+            pulseSteps: [0, 10], pulseEveryBars: 2,
+            gestureSteps: [3, 11], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          surya: {
+            bpm: 50, volume: .150, cutoff: 3000,
+            progression: [0, 3, 4, 0], chord: [0, 3, 4],
+            style: "surya", chordEveryBars: 2, chordLengthSteps: 32,
+            pulseSteps: [0], pulseEveryBars: 1,
+            gestureSteps: [7, 15], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          chrome: {
+            bpm: 62, volume: .130, cutoff: 4600,
+            progression: [0, 5, 8, 3], chord: [0, 4, 7],
+            style: "chrome", chordEveryBars: 2, chordLengthSteps: 29,
+            pulseSteps: [0, 12], pulseEveryBars: 2,
+            gestureSteps: [4, 10], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          between: {
+            bpm: 46, volume: .125, cutoff: 2900,
+            progression: [0, 3, 6, 2], chord: [0, 3, 6],
+            style: "between", chordEveryBars: 2, chordLengthSteps: 34,
+            pulseSteps: [0], pulseEveryBars: 2,
+            gestureSteps: [8], gestureEveryBars: 1,
+            airEveryBars: 3
+          },
+          metal: {
+            bpm: 48, volume: .120, cutoff: 2700,
+            progression: [0, 1, 4, 0], chord: [0, 4],
+            style: "metal", chordEveryBars: 2, chordLengthSteps: 32,
+            pulseSteps: [0, 8], pulseEveryBars: 2,
+            gestureSteps: [7, 15], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          rock: {
+            bpm: 55, volume: .135, cutoff: 3200,
+            progression: [0, 3, 4, 0], chord: [0, 4],
+            style: "rock", chordEveryBars: 2, chordLengthSteps: 30,
+            pulseSteps: [0, 10], pulseEveryBars: 2,
+            gestureSteps: [6, 14], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          pop: {
+            bpm: 60, volume: .145, cutoff: 4300,
+            progression: [0, 3, 4, 3], chord: [0, 2, 4],
+            style: "pop", chordEveryBars: 2, chordLengthSteps: 29,
+            pulseSteps: [0, 8], pulseEveryBars: 2,
+            gestureSteps: [3, 7, 13], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          rnb: {
+            bpm: 52, volume: .145, cutoff: 3400,
+            progression: [0, 3, 4, 1], chord: [0, 2, 4, 6],
+            style: "rnb", chordEveryBars: 2, chordLengthSteps: 32,
+            pulseSteps: [0], pulseEveryBars: 2,
+            gestureSteps: [5, 13], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          hiphop: {
+            bpm: 48, volume: .135, cutoff: 2400,
+            progression: [0, 3, 5, 4], chord: [0, 2],
+            style: "hiphop", chordEveryBars: 2, chordLengthSteps: 31,
+            pulseSteps: [0, 11], pulseEveryBars: 2,
+            gestureSteps: [7, 15], gestureEveryBars: 2,
+            airEveryBars: 4
+          },
+          electronic: {
+            bpm: 58, volume: .140, cutoff: 5000,
+            progression: [0, 2, 4, 1], chord: [0, 2, 4],
+            style: "electronic", chordEveryBars: 2, chordLengthSteps: 30,
+            pulseSteps: [0, 8], pulseEveryBars: 2,
+            gestureSteps: [2, 6, 10, 14], gestureEveryBars: 2,
+            airEveryBars: 4
+          }
+        };
+        return profiles[area.id] || profiles.lumen;
+      }
+
+      function deckFrequency(deck, scaleIndex, octave = 0) {
+        const length = deck.scale.cents.length;
+        const wrapped = ((scaleIndex % length) + length) % length;
+        const carry = Math.floor(scaleIndex / length);
+        const cents = deck.scale.cents[wrapped] + (octave + carry) * 1200;
+        return centsToFreq(deck.root, cents);
+      }
+
+      function connectToDeck(node, deck) {
+        node.connect(deck.input);
+      }
+
+      function scheduleBgKick(deck, time, accent = 1) {
+        const style = deck.profile.drumStyle || "lounge";
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = style === "metal" || style === "rock" ? "triangle" : "sine";
+        const startFrequency =
+          style === "hiphop" ? 105 :
+          style === "metal" ? 145 :
+          style === "psy" ? 142 :
+          style === "club" ? 132 : 125;
+        const endFrequency =
+          style === "hiphop" ? 39 :
+          style === "metal" ? 52 :
+          style === "psy" ? 43 : 46;
+        const decay =
+          style === "hiphop" ? .36 :
+          style === "metal" ? .15 :
+          style === "psy" ? .205 :
+          style === "rock" ? .21 : .24;
+        const peak =
+          style === "metal" ? .115 :
+          style === "rock" ? .135 :
+          style === "psy" ? .155 :
+          style === "hiphop" ? .19 :
+          style === "club" ? .175 : .18;
+
+        osc.frequency.setValueAtTime(startFrequency, time);
+        osc.frequency.exponentialRampToValueAtTime(endFrequency, time + Math.min(.11, decay * .55));
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(peak * accent, time + .004);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + decay);
+        osc.connect(gain);
+        connectToDeck(gain, deck);
+        osc.start(time);
+        osc.stop(time + decay + .03);
+      }
+
+      function scheduleBgHat(deck, time, open = false) {
+        const style = deck.profile.drumStyle || "lounge";
+        const source = audioCtx.createBufferSource();
+        const hp = audioCtx.createBiquadFilter();
+        const band = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        source.buffer = getBackgroundNoise();
+        hp.type = "highpass";
+        hp.frequency.value =
+          style === "hiphop" ? 5200 :
+          style === "metal" ? 7400 :
+          style === "psy" ? 6900 :
+          style === "rock" ? 6100 :
+          open ? 5100 : 6800;
+        band.type = "bandpass";
+        band.frequency.value = style === "metal" ? 9100 : 7600;
+        band.Q.value = .45;
+
+        const length =
+          style === "hiphop" && open ? .11 :
+          open ? .18 :
+          style === "metal" ? .035 : .055;
+        const peak =
+          style === "metal" ? .010 :
+          style === "rock" ? .014 :
+          style === "psy" ? .014 :
+          style === "hiphop" ? .011 :
+          style === "club" ? .019 : .017;
+
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(peak * (open ? 1.35 : 1), time + .002);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + length);
+        source.connect(hp).connect(band).connect(gain);
+        connectToDeck(gain, deck);
+        source.start(time, Math.random() * .75, length + .02);
+        source.stop(time + length + .03);
+      }
+
+      function scheduleBgBackbeat(deck, time) {
+        const style = deck.profile.drumStyle || "clap";
+
+        if (style === "rim") {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(1650, time);
+          osc.frequency.exponentialRampToValueAtTime(720, time + .035);
+          gain.gain.setValueAtTime(.0001, time);
+          gain.gain.exponentialRampToValueAtTime(.032, time + .001);
+          gain.gain.exponentialRampToValueAtTime(.0001, time + .06);
+          osc.connect(gain);
+          connectToDeck(gain, deck);
+          osc.start(time);
+          osc.stop(time + .07);
+          return;
+        }
+
+        if (style === "rock" || style === "metal" || style === "hiphop") {
+          const body = audioCtx.createOscillator();
+          const bodyGain = audioCtx.createGain();
+          body.type = "triangle";
+          body.frequency.setValueAtTime(style === "metal" ? 225 : 190, time);
+          body.frequency.exponentialRampToValueAtTime(105, time + .09);
+          bodyGain.gain.setValueAtTime(.0001, time);
+          bodyGain.gain.exponentialRampToValueAtTime(
+            style === "metal" ? .055 : style === "hiphop" ? .07 : .065,
+            time + .002
+          );
+          bodyGain.gain.exponentialRampToValueAtTime(.0001, time + .14);
+          body.connect(bodyGain);
+          connectToDeck(bodyGain, deck);
+          body.start(time);
+          body.stop(time + .16);
+
+          const noise = audioCtx.createBufferSource();
+          const band = audioCtx.createBiquadFilter();
+          const noiseGain = audioCtx.createGain();
+          noise.buffer = getBackgroundNoise();
+          band.type = "bandpass";
+          band.frequency.value = style === "metal" ? 2600 : style === "hiphop" ? 1700 : 2200;
+          band.Q.value = .75;
+          noiseGain.gain.setValueAtTime(.0001, time);
+          noiseGain.gain.exponentialRampToValueAtTime(
+            style === "metal" ? .022 : .032,
+            time + .002
+          );
+          noiseGain.gain.exponentialRampToValueAtTime(.0001, time + .11);
+          noise.connect(band).connect(noiseGain);
+          connectToDeck(noiseGain, deck);
+          noise.start(time, Math.random() * .7, .13);
+          noise.stop(time + .14);
+          return;
+        }
+
+        [0, .018, .036].forEach((offset, i) => {
+          const source = audioCtx.createBufferSource();
+          const band = audioCtx.createBiquadFilter();
+          const gain = audioCtx.createGain();
+          source.buffer = getBackgroundNoise();
+          band.type = "bandpass";
+          band.frequency.value = 1250 + i * 330;
+          band.Q.value = .75;
+          const t = time + offset;
+          gain.gain.setValueAtTime(.0001, t);
+          gain.gain.exponentialRampToValueAtTime(.025 / (1 + i * .35), t + .002);
+          gain.gain.exponentialRampToValueAtTime(.0001, t + .085);
+          source.connect(band).connect(gain);
+          connectToDeck(gain, deck);
+          source.start(t, Math.random() * .7, .1);
+          source.stop(t + .11);
+        });
+      }
+
+      function scheduleBgBass(deck, degree, time, duration = .23) {
+        const style = deck.profile.bassStyle || "soft";
+        const freq = deckFrequency(deck, degree, -1);
+
+        if (style.startsWith("psy")) {
+          const osc = audioCtx.createOscillator();
+          const body = audioCtx.createOscillator();
+          const filter = audioCtx.createBiquadFilter();
+          const gain = audioCtx.createGain();
+          const shaper = audioCtx.createWaveShaper();
+          const flavor = deck.profile.psyFlavor || "electronic";
+
+          osc.type =
+            flavor === "metal" || flavor === "rock" ? "sawtooth" :
+            flavor === "electronic" ? "square" :
+            "triangle";
+          body.type = "sine";
+
+          osc.frequency.setValueAtTime(freq * 1.28, time);
+          osc.frequency.exponentialRampToValueAtTime(freq, time + .024);
+          body.frequency.value = freq;
+
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(
+            flavor === "metal" ? 780 :
+            flavor === "rock" ? 920 :
+            flavor === "pop" ? 1120 :
+            flavor === "rnb" ? 760 :
+            flavor === "hiphop" ? 590 : 1380,
+            time
+          );
+          filter.frequency.exponentialRampToValueAtTime(
+            flavor === "electronic" ? 520 : 330,
+            time + Math.min(.13, duration)
+          );
+          filter.Q.value =
+            flavor === "electronic" ? 4.8 :
+            flavor === "pop" ? 3.2 : 2.1;
+
+          shaper.curve = distortionCurve(
+            flavor === "metal" ? 18 :
+            flavor === "rock" ? 11 :
+            flavor === "electronic" ? 9 : 5
+          );
+          shaper.oversample = "2x";
+
+          const bodyGain = audioCtx.createGain();
+          bodyGain.gain.value =
+            flavor === "hiphop" ? .43 :
+            flavor === "rnb" ? .33 : .22;
+
+          const peak =
+            flavor === "metal" ? .030 :
+            flavor === "rock" ? .043 :
+            flavor === "pop" ? .050 :
+            flavor === "rnb" ? .047 :
+            flavor === "hiphop" ? .056 : .048;
+          const gate = Math.min(
+            flavor === "hiphop" ? .145 :
+            flavor === "rnb" ? .125 : .105,
+            duration
+          );
+
+          gain.gain.setValueAtTime(.0001, time);
+          gain.gain.exponentialRampToValueAtTime(peak, time + .003);
+          gain.gain.exponentialRampToValueAtTime(.0001, time + gate);
+
+          osc.connect(filter);
+          body.connect(bodyGain).connect(filter);
+          filter.connect(shaper).connect(gain);
+          connectToDeck(gain, deck);
+
+          osc.start(time);
+          body.start(time);
+          osc.stop(time + gate + .035);
+          body.stop(time + gate + .035);
+          return;
+        }
+
+        if (style === "808") {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq * 1.32, time);
+          osc.frequency.exponentialRampToValueAtTime(freq, time + .075);
+          gain.gain.setValueAtTime(.0001, time);
+          gain.gain.exponentialRampToValueAtTime(.145, time + .006);
+          gain.gain.exponentialRampToValueAtTime(.0001, time + Math.max(.34, duration * 2.2));
+          osc.connect(gain);
+          connectToDeck(gain, deck);
+          osc.start(time);
+          osc.stop(time + Math.max(.38, duration * 2.3));
+          return;
+        }
+
+        const osc = audioCtx.createOscillator();
+        const second = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        osc.type =
+          style === "chug" || style === "rock" ? "sawtooth" :
+          style === "pulse" ? "square" : "sine";
+        second.type = "triangle";
+        osc.frequency.setValueAtTime(freq * (style === "chug" ? 1 : 1.02), time);
+        if (style !== "chug") osc.frequency.exponentialRampToValueAtTime(freq, time + .045);
+        second.frequency.value = freq * 2;
+
+        filter.type = "lowpass";
+        filter.frequency.value =
+          style === "chug" ? 520 :
+          style === "rock" ? 760 :
+          style === "pulse" ? 900 :
+          style === "pop" ? 680 : 540;
+        filter.Q.value = style === "pulse" ? 3.4 : 1.1;
+
+        const peak =
+          style === "chug" ? .042 :
+          style === "rock" ? .070 :
+          style === "pulse" ? .075 :
+          style === "pop" ? .078 :
+          style === "warm" ? .090 : .082;
+        const gate =
+          style === "chug" ? Math.min(.13, duration) :
+          style === "pulse" ? Math.min(.19, duration) :
+          duration;
+
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(peak, time + .006);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + gate);
+
+        const secondGain = audioCtx.createGain();
+        secondGain.gain.value =
+          style === "chug" ? .06 :
+          style === "rock" ? .12 :
+          style === "pop" ? .18 : .13;
+
+        if (style === "chug") {
+          const shaper = audioCtx.createWaveShaper();
+          shaper.curve = distortionCurve(18);
+          shaper.oversample = "2x";
+          osc.connect(filter);
+          second.connect(secondGain).connect(filter);
+          filter.connect(shaper).connect(gain);
+        } else {
+          osc.connect(filter);
+          second.connect(secondGain).connect(filter);
+          filter.connect(gain);
+        }
+
+        connectToDeck(gain, deck);
+        osc.start(time);
+        second.start(time);
+        osc.stop(time + gate + .04);
+        second.stop(time + gate + .04);
+      }
+
+      function schedulePowerChord(deck, degree, time, duration) {
+        const isMetal = deck.profile.texture === "metal";
+        const mix = audioCtx.createGain();
+        const shaper = audioCtx.createWaveShaper();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        [0, 4, 7].forEach((offset, i) => {
+          const osc = audioCtx.createOscillator();
+          const voice = audioCtx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.value = deckFrequency(deck, degree + offset, deck.root < 130 ? 1 : 0);
+          osc.detune.value = i === 2 ? -4 : i * 2;
+          voice.gain.value = i === 0 ? .36 : .21;
+          osc.connect(voice).connect(mix);
+          osc.start(time);
+          osc.stop(time + duration + .12);
+        });
+
+        mix.gain.value = isMetal ? .18 : .30;
+        shaper.curve = distortionCurve(isMetal ? 24 : 12);
+        shaper.oversample = "2x";
+        filter.type = "lowpass";
+        filter.frequency.value = isMetal ? 1550 : 2600;
+        filter.Q.value = .8;
+
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(isMetal ? .018 : .040, time + .006);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+
+        mix.connect(shaper).connect(filter).connect(gain);
+        connectToDeck(gain, deck);
+      }
+
+      function scheduleRhodesChord(deck, degree, time, duration) {
+        const mix = audioCtx.createGain();
+        const tone = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        deck.profile.chord.forEach((offset, i) => {
+          const carrier = audioCtx.createOscillator();
+          const mod = audioCtx.createOscillator();
+          const modGain = audioCtx.createGain();
+          const voice = audioCtx.createGain();
+          const freq = deckFrequency(deck, degree + offset, 0);
+
+          carrier.type = "sine";
+          mod.type = "sine";
+          carrier.frequency.value = freq;
+          mod.frequency.value = freq * 2;
+          modGain.gain.value = freq * .42;
+          voice.gain.value = 1 / Math.max(3.3, deck.profile.chord.length);
+
+          mod.connect(modGain).connect(carrier.frequency);
+          carrier.connect(voice).connect(mix);
+          carrier.start(time);
+          mod.start(time);
+          carrier.stop(time + duration + .35);
+          mod.stop(time + duration + .35);
+        });
+
+        tone.type = "lowpass";
+        tone.frequency.value = 2350;
+        tone.Q.value = .7;
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(.052, time + .035);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+        mix.connect(tone).connect(gain);
+        connectToDeck(gain, deck);
+      }
+
+      function scheduleBgChord(deck, degree, time, duration) {
+        const style = deck.profile.chordStyle || "pad";
+        if (style === "power") {
+          schedulePowerChord(deck, degree, time, duration);
+          return;
+        }
+        if (style === "rhodes") {
+          scheduleRhodesChord(deck, degree, time, duration);
+          return;
+        }
+
+        const mix = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        const texture = deck.profile.texture;
+        const chordOctave = deck.root < 130 ? 1 : 0;
+
+        deck.profile.chord.forEach((offset, i) => {
+          const osc = audioCtx.createOscillator();
+          const voice = audioCtx.createGain();
+          osc.type =
+            style === "sample" ? "triangle" :
+            style === "popStab" ? "sawtooth" :
+            style === "offbeat" ? "sawtooth" :
+            texture === "rnb" || texture === "glass" || texture === "micro" ? "sine" :
+            texture === "pluck" || texture === "gamelan" ? "triangle" :
+            "sawtooth";
+          osc.frequency.value = deckFrequency(deck, degree + offset, chordOctave);
+          osc.detune.value = (i - 1) * (texture === "micro" ? 4.5 : 2.2);
+          voice.gain.value = 1 / Math.max(2.6, deck.profile.chord.length);
+          osc.connect(voice).connect(mix);
+          osc.start(time);
+          osc.stop(time + duration + .28);
+        });
+
+        filter.type = "lowpass";
+        filter.frequency.value =
+          style === "sample" ? 1450 :
+          style === "offbeat" ? 4200 :
+          style === "popStab" ? 3400 :
+          texture === "electronic" ? 3300 :
+          texture === "pop" ? 3100 : 2200;
+        filter.Q.value = style === "offbeat" ? 4.4 : style === "popStab" ? 2.1 : .9;
+
+        const peak =
+          style === "sample" ? .028 :
+          style === "offbeat" ? .040 :
+          style === "popStab" ? .044 : .047;
+        const attack = style === "sample" || style === "popStab" || style === "offbeat" ? .006 : .045;
+
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(peak, time + attack);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+
+        mix.connect(filter).connect(gain);
+        connectToDeck(gain, deck);
+      }
+
+      function scheduleBgMotif(deck, degree, time) {
+        const style = deck.profile.motifStyle || deck.profile.texture;
+        const texture = deck.profile.texture;
+        const octave =
+          style === "sample" ? 0 :
+          style === "metalLead" ? 1 :
+          style === "rockLick" ? 1 : 1;
+        const freq = deckFrequency(deck, degree, octave);
+        const gain = audioCtx.createGain();
+
+        if (texture === "gamelan") {
+          const carrier = audioCtx.createOscillator();
+          const mod = audioCtx.createOscillator();
+          const modGain = audioCtx.createGain();
+          carrier.type = "sine";
+          carrier.frequency.value = freq;
+          mod.type = "sine";
+          mod.frequency.value = freq * 1.414;
+          modGain.gain.value = freq * .42;
+          mod.connect(modGain).connect(carrier.frequency);
+          carrier.connect(gain);
+          connectToDeck(gain, deck);
+          gain.gain.setValueAtTime(.0001, time);
+          gain.gain.exponentialRampToValueAtTime(.032, time + .003);
+          gain.gain.exponentialRampToValueAtTime(.0001, time + .42);
+          carrier.start(time); mod.start(time);
+          carrier.stop(time + .48); mod.stop(time + .48);
+          return;
+        }
+
+        if (style === "rnbBell") {
+          const carrier = audioCtx.createOscillator();
+          const mod = audioCtx.createOscillator();
+          const modGain = audioCtx.createGain();
+          carrier.type = "sine";
+          mod.type = "sine";
+          carrier.frequency.value = freq;
+          mod.frequency.value = freq * 3;
+          modGain.gain.value = freq * .32;
+          mod.connect(modGain).connect(carrier.frequency);
+          gain.gain.setValueAtTime(.0001, time);
+          gain.gain.exponentialRampToValueAtTime(.025, time + .004);
+          gain.gain.exponentialRampToValueAtTime(.0001, time + .36);
+          carrier.connect(gain);
+          connectToDeck(gain, deck);
+          carrier.start(time); mod.start(time);
+          carrier.stop(time + .42); mod.stop(time + .42);
+          return;
+        }
+
+        const source = audioCtx.createOscillator();
+        source.type =
+          style === "electroArp" ? "square" :
+          style === "popArp" ? "sawtooth" :
+          style === "sample" ? "triangle" :
+          style === "metalLead" || style === "rockLick" ? "sawtooth" :
+          texture === "glitch" || texture === "electronic" ? "square" :
+          "triangle";
+        source.frequency.setValueAtTime(
+          texture === "raga" ? freq * .985 : freq,
+          time
+        );
+        if (texture === "raga") source.frequency.exponentialRampToValueAtTime(freq, time + .07);
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value =
+          style === "metalLead" ? 1250 :
+          style === "rockLick" ? 2350 :
+          style === "electroArp" ? 4800 :
+          style === "popArp" ? 3900 :
+          style === "sample" ? 1050 :
+          texture === "hiphop" ? 700 : 3000;
+        filter.Q.value = style === "electroArp" ? 5 : style === "popArp" ? 2.7 : 1.2;
+
+        const peak =
+          style === "metalLead" ? .013 :
+          style === "rockLick" ? .023 :
+          style === "electroArp" ? .028 :
+          style === "popArp" ? .026 :
+          style === "sample" ? .018 : .030;
+        const release =
+          style === "sample" ? .28 :
+          style === "rockLick" ? .24 :
+          style === "metalLead" ? .14 : .18;
+
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(peak, time + .004);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + release);
+
+        if (style === "metalLead" || style === "rockLick") {
+          const shaper = audioCtx.createWaveShaper();
+          shaper.curve = distortionCurve(style === "metalLead" ? 14 : 8);
+          shaper.oversample = "2x";
+          source.connect(filter).connect(shaper).connect(gain);
+        } else {
+          source.connect(filter).connect(gain);
+        }
+
+        connectToDeck(gain, deck);
+        source.start(time);
+        source.stop(time + release + .06);
+      }
+
+
+      function schedulePsyFx(deck, time, bar) {
+        const flavor = deck.profile.psyFlavor || "electronic";
+        const duration = deck.secondsPerStep * 5.5;
+
+        if (flavor === "hiphop") {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(deck.root * .9, time);
+          osc.frequency.exponentialRampToValueAtTime(deck.root * .35, time + duration);
+          gain.gain.setValueAtTime(.0001, time);
+          gain.gain.exponentialRampToValueAtTime(.032, time + .015);
+          gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+          osc.connect(gain);
+          connectToDeck(gain, deck);
+          osc.start(time);
+          osc.stop(time + duration + .03);
+          return;
+        }
+
+        const source = audioCtx.createBufferSource();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        source.buffer = getBackgroundNoise();
+        filter.type = flavor === "rnb" ? "bandpass" : "highpass";
+        filter.frequency.setValueAtTime(
+          flavor === "metal" ? 520 :
+          flavor === "rock" ? 690 :
+          flavor === "pop" ? 1150 :
+          flavor === "rnb" ? 780 : 900,
+          time
+        );
+        filter.frequency.exponentialRampToValueAtTime(
+          flavor === "metal" ? 6200 :
+          flavor === "rock" ? 5400 :
+          flavor === "pop" ? 7900 :
+          flavor === "rnb" ? 3100 : 9800,
+          time + duration
+        );
+        filter.Q.value =
+          flavor === "rnb" ? 6 :
+          flavor === "electronic" ? 4.5 : 1.1;
+
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(
+          flavor === "metal" ? .010 :
+          flavor === "rock" ? .013 :
+          flavor === "pop" ? .014 :
+          flavor === "rnb" ? .011 : .016,
+          time + duration * .72
+        );
+        gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+
+        source.connect(filter).connect(gain);
+        connectToDeck(gain, deck);
+        source.start(time, Math.random() * .4, duration);
+        source.stop(time + duration + .02);
+
+        if (flavor === "electronic" || flavor === "pop") {
+          const tone = audioCtx.createOscillator();
+          const toneFilter = audioCtx.createBiquadFilter();
+          const toneGain = audioCtx.createGain();
+          tone.type = flavor === "electronic" ? "sawtooth" : "sine";
+          tone.frequency.setValueAtTime(
+            deckFrequency(deck, (bar + 2) % deck.scale.cents.length, 1),
+            time
+          );
+          toneFilter.type = "bandpass";
+          toneFilter.frequency.setValueAtTime(650, time);
+          toneFilter.frequency.exponentialRampToValueAtTime(5200, time + duration);
+          toneFilter.Q.value = 7;
+          toneGain.gain.setValueAtTime(.0001, time);
+          toneGain.gain.exponentialRampToValueAtTime(.009, time + duration * .55);
+          toneGain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+          tone.connect(toneFilter).connect(toneGain);
+          connectToDeck(toneGain, deck);
+          tone.start(time);
+          tone.stop(time + duration + .02);
+        }
+      }
+
+      function ambientStyle(style) {
+        const styles = {
+          lumen:      { wave: "sine",     second: "triangle", detune: 4,  bright: 2800, peak: .042, sub: .14, shimmer: .10 },
+          kiri:       { wave: "triangle", second: "sine",     detune: 2,  bright: 2100, peak: .036, sub: .10, shimmer: .07 },
+          nusa:       { wave: "sine",     second: "triangle", detune: 1,  bright: 3300, peak: .035, sub: .09, shimmer: .16 },
+          surya:      { wave: "sine",     second: "sine",     detune: 5,  bright: 1600, peak: .040, sub: .22, shimmer: .05 },
+          chrome:     { wave: "triangle", second: "sine",     detune: 7,  bright: 3600, peak: .030, sub: .08, shimmer: .13 },
+          between:    { wave: "sine",     second: "sine",     detune: 9,  bright: 1900, peak: .028, sub: .12, shimmer: .08 },
+          metal:      { wave: "sine",     second: "triangle", detune: 3,  bright: 1750, peak: .030, sub: .24, shimmer: .07 },
+          rock:       { wave: "triangle", second: "sine",     detune: 5,  bright: 2200, peak: .034, sub: .18, shimmer: .06 },
+          pop:        { wave: "sine",     second: "triangle", detune: 3,  bright: 3500, peak: .037, sub: .10, shimmer: .14 },
+          rnb:        { wave: "sine",     second: "sine",     detune: 2,  bright: 2000, peak: .040, sub: .16, shimmer: .09 },
+          hiphop:     { wave: "sine",     second: "triangle", detune: 2,  bright: 1250, peak: .034, sub: .28, shimmer: .035 },
+          electronic: { wave: "triangle", second: "sine",     detune: 8,  bright: 4200, peak: .033, sub: .11, shimmer: .17 }
+        };
+        return styles[style] || styles.lumen;
+      }
+
+      function scheduleAmbientPad(deck, degree, time, duration) {
+        const style = deck.profile.style;
+        const character = ambientStyle(style);
+        const mix = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        const voices = [...deck.profile.chord];
+
+        // Certain homages are carried by interval shape rather than instrument imitation.
+        if (style === "metal" && !voices.includes(4)) voices.push(4);
+        if (style === "rock" && !voices.includes(4)) voices.push(4);
+
+        voices.forEach((offset, index) => {
+          const osc = audioCtx.createOscillator();
+          const voice = audioCtx.createGain();
+          const octave = deck.root < 130 ? 1 : 0;
+          osc.type = index % 2 === 0 ? character.wave : character.second;
+          osc.frequency.value = deckFrequency(deck, degree + offset, octave);
+          osc.detune.value = (index - (voices.length - 1) / 2) * character.detune;
+          voice.gain.value = 1 / Math.max(3.5, voices.length * 1.55);
+          osc.connect(voice).connect(mix);
+          osc.start(time);
+          osc.stop(time + duration + 1.8);
+        });
+
+        // A low, nearly subliminal root.
+        const sub = audioCtx.createOscillator();
+        const subGain = audioCtx.createGain();
+        sub.type = "sine";
+        sub.frequency.value = deckFrequency(deck, degree, -1);
+        subGain.gain.value = character.sub;
+        sub.connect(subGain).connect(mix);
+        sub.start(time);
+        sub.stop(time + duration + 1.8);
+
+        // A very faint upper partial gives each garden a halo.
+        const shimmer = audioCtx.createOscillator();
+        const shimmerGain = audioCtx.createGain();
+        shimmer.type = "sine";
+        shimmer.frequency.value = deckFrequency(deck, degree, 2) * (
+          style === "nusa" ? 1.007 :
+          style === "between" ? 1.004 :
+          style === "metal" ? 1.5 :
+          1
+        );
+        shimmerGain.gain.value = character.shimmer;
+        shimmer.connect(shimmerGain).connect(mix);
+        shimmer.start(time);
+        shimmer.stop(time + duration + 1.8);
+
+        filter.type = style === "electronic" || style === "between" ? "bandpass" : "lowpass";
+        filter.frequency.setValueAtTime(Math.max(420, character.bright * .42), time);
+        filter.frequency.exponentialRampToValueAtTime(character.bright, time + duration * .44);
+        filter.frequency.exponentialRampToValueAtTime(Math.max(500, character.bright * .52), time + duration);
+        filter.Q.value =
+          style === "electronic" ? 2.7 :
+          style === "between" ? 2.2 :
+          style === "nusa" ? 1.5 : .65;
+
+        const attack =
+          style === "surya" || style === "between" ? 1.35 :
+          style === "metal" ? 1.10 :
+          .72;
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(character.peak, time + attack);
+        gain.gain.setValueAtTime(character.peak * .82, time + Math.max(attack + .1, duration * .68));
+        gain.gain.exponentialRampToValueAtTime(.0001, time + duration + 1.2);
+
+        mix.connect(filter).connect(gain);
+        connectToDeck(gain, deck);
+      }
+
+      function scheduleAmbientPulse(deck, degree, time) {
+        const style = deck.profile.style;
+        const character = ambientStyle(style);
+        const osc = audioCtx.createOscillator();
+        const overtone = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        const overtoneGain = audioCtx.createGain();
+
+        osc.type = "sine";
+        overtone.type = style === "rock" || style === "nusa" ? "triangle" : "sine";
+        osc.frequency.setValueAtTime(deckFrequency(deck, degree, -1) * 1.025, time);
+        osc.frequency.exponentialRampToValueAtTime(deckFrequency(deck, degree, -1), time + .12);
+        overtone.frequency.value = deckFrequency(deck, degree, 0);
+        overtoneGain.gain.value =
+          style === "metal" ? .08 :
+          style === "hiphop" ? .035 :
+          .055;
+
+        filter.type = "lowpass";
+        filter.frequency.value =
+          style === "hiphop" ? 520 :
+          style === "metal" ? 720 :
+          style === "surya" ? 640 :
+          980;
+        filter.Q.value = .55;
+
+        const peak =
+          style === "hiphop" ? .050 :
+          style === "metal" ? .030 :
+          .034;
+        const release =
+          style === "surya" || style === "hiphop" ? 1.10 :
+          .78;
+
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(peak, time + .045);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + release);
+
+        osc.connect(filter);
+        overtone.connect(overtoneGain).connect(filter);
+        filter.connect(gain);
+        connectToDeck(gain, deck);
+
+        osc.start(time);
+        overtone.start(time);
+        osc.stop(time + release + .08);
+        overtone.stop(time + release + .08);
+      }
+
+      function scheduleAmbientGesture(deck, degree, time) {
+        const style = deck.profile.style;
+        const character = ambientStyle(style);
+        const carrier = audioCtx.createOscillator();
+        const second = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        const secondGain = audioCtx.createGain();
+        const freq = deckFrequency(deck, degree, 1);
+
+        carrier.type =
+          style === "kiri" || style === "nusa" ? "triangle" :
+          "sine";
+        second.type = "sine";
+        carrier.frequency.setValueAtTime(
+          style === "surya" ? freq * .982 : freq,
+          time
+        );
+        if (style === "surya") {
+          carrier.frequency.exponentialRampToValueAtTime(freq, time + .42);
+        }
+
+        second.frequency.value = freq * (
+          style === "metal" ? 1.5 :
+          style === "between" ? 1.008 :
+          style === "electronic" ? 2.01 :
+          2
+        );
+        secondGain.gain.value =
+          style === "pop" ? .16 :
+          style === "nusa" ? .14 :
+          style === "metal" ? .07 :
+          .09;
+
+        filter.type =
+          style === "electronic" || style === "chrome" ? "bandpass" :
+          "lowpass";
+        filter.frequency.setValueAtTime(
+          style === "hiphop" ? 850 :
+          Math.max(1100, character.bright * .55),
+          time
+        );
+        filter.frequency.exponentialRampToValueAtTime(
+          character.bright,
+          time + .35
+        );
+        filter.Q.value =
+          style === "electronic" ? 3.8 :
+          style === "chrome" ? 2.4 :
+          style === "kiri" ? 1.7 :
+          .8;
+
+        const peak =
+          style === "metal" ? .020 :
+          style === "hiphop" ? .017 :
+          style === "pop" ? .027 :
+          .023;
+        const attack =
+          style === "surya" || style === "rnb" ? .18 :
+          style === "metal" ? .12 :
+          .035;
+        const release =
+          style === "between" || style === "electronic" ? 1.65 :
+          style === "rnb" ? 1.40 :
+          1.05;
+
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(peak, time + attack);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + release);
+
+        carrier.connect(filter);
+        second.connect(secondGain).connect(filter);
+        filter.connect(gain);
+        connectToDeck(gain, deck);
+
+        carrier.start(time);
+        second.start(time);
+        carrier.stop(time + release + .1);
+        second.stop(time + release + .1);
+      }
+
+      function scheduleAmbientAir(deck, time) {
+        const style = deck.profile.style;
+        const source = audioCtx.createBufferSource();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        const duration = deck.secondsPerStep * 12;
+
+        source.buffer = getBackgroundNoise();
+        filter.type = style === "nusa" || style === "electronic" ? "bandpass" : "highpass";
+        filter.frequency.setValueAtTime(
+          style === "hiphop" ? 900 :
+          style === "metal" ? 1200 :
+          1500,
+          time
+        );
+        filter.frequency.exponentialRampToValueAtTime(
+          style === "rnb" ? 3300 :
+          style === "metal" ? 4100 :
+          style === "between" ? 2900 :
+          6200,
+          time + duration
+        );
+        filter.Q.value =
+          style === "nusa" ? 5.2 :
+          style === "electronic" ? 4.0 :
+          .65;
+
+        const peak =
+          style === "metal" ? .0055 :
+          style === "hiphop" ? .0045 :
+          .0075;
+        gain.gain.setValueAtTime(.0001, time);
+        gain.gain.exponentialRampToValueAtTime(peak, time + duration * .55);
+        gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+
+        source.connect(filter).connect(gain);
+        connectToDeck(gain, deck);
+        source.start(time, Math.random() * .5, duration);
+        source.stop(time + duration + .02);
+      }
+
+      function scheduleMusicStep(deck, absoluteStep, time) {
+        if (deck.stopped) return;
+
+        const step = absoluteStep % 16;
+        const bar = Math.floor(absoluteStep / 16);
+        const profile = deck.profile;
+        const progressionDegree = profile.progression[
+          Math.floor(bar / Math.max(1, profile.chordEveryBars)) % profile.progression.length
+        ];
+        const scaleLength = deck.scale.cents.length;
+
+        if (
+          step === 0 &&
+          bar % Math.max(1, profile.chordEveryBars) === 0
+        ) {
+          scheduleAmbientPad(
+            deck,
+            progressionDegree % scaleLength,
+            time,
+            deck.secondsPerStep * profile.chordLengthSteps
+          );
+        }
+
+        if (
+          profile.pulseSteps.includes(step) &&
+          bar % Math.max(1, profile.pulseEveryBars) === 0
+        ) {
+          const pulseOffset =
+            step === 0 ? 0 :
+            Math.max(1, Math.floor(scaleLength / 2));
+          scheduleAmbientPulse(
+            deck,
+            (progressionDegree + pulseOffset) % scaleLength,
+            time
+          );
+        }
+
+        if (
+          profile.gestureSteps.includes(step) &&
+          bar % Math.max(1, profile.gestureEveryBars) === 1
+        ) {
+          const gestureMap = [0, 2, 4, 1, 3, 5, 2, 4, 1, 5, 3, 0, 4, 2, 5, 1];
+          scheduleAmbientGesture(
+            deck,
+            (progressionDegree + gestureMap[step]) % scaleLength,
+            time
+          );
+        }
+
+        if (
+          step === 15 &&
+          bar % Math.max(1, profile.airEveryBars) === profile.airEveryBars - 1
+        ) {
+          scheduleAmbientAir(deck, time);
+        }
+      }
+
+      function runMusicScheduler(deck) {
+        if (deck.stopped || !audioCtx) return;
+        const horizon = audioCtx.currentTime + .16;
+        while (deck.nextTime < horizon) {
+          scheduleMusicStep(deck, deck.step, deck.nextTime);
+          const pairSwing = deck.step % 2 === 0
+            ? 1 - deck.profile.swing
+            : 1 + deck.profile.swing;
+          deck.nextTime += deck.secondsPerStep * pairSwing;
+          deck.step++;
+        }
+      }
+
+      function createMusicDeck() {
+        const area = areas[areaIndex];
+        const profile = getMusicProfile(area);
+        const scale = getAreaScale(area, stage);
+        const input = audioCtx.createGain();
+        const tone = audioCtx.createBiquadFilter();
+        const compressor = audioCtx.createDynamicsCompressor();
+        const output = audioCtx.createGain();
+        const send = audioCtx.createGain();
+
+        tone.type = "lowpass";
+        tone.frequency.value = profile.cutoff;
+        tone.Q.value = .55;
+
+        compressor.threshold.value = -24;
+        compressor.knee.value = 18;
+        compressor.ratio.value = 3.2;
+        compressor.attack.value = .012;
+        compressor.release.value = .24;
+
+        output.gain.value = .0001;
+        send.gain.value =
+          profile.style === "between" ? .48 :
+          profile.style === "electronic" ? .42 :
+          profile.style === "rnb" ? .40 :
+          profile.style === "metal" ? .31 :
+          profile.style === "hiphop" ? .24 :
+          .36;
+
+        input.connect(tone).connect(compressor).connect(output);
+        output.connect(backgroundBus);
+        output.connect(send).connect(backgroundConvolver);
+
+        const deck = {
+          areaId: area.id,
+          root: area.root,
+          scale: {
+            cents: [...scale.cents],
+            labels: [...scale.labels]
+          },
+          profile,
+          input,
+          tone,
+          compressor,
+          output,
+          send,
+          step: 0,
+          secondsPerStep: 60 / profile.bpm / 4,
+          nextTime: audioCtx.currentTime + .06,
+          timer: null,
+          stopped: false
+        };
+
+        deck.timer = setInterval(() => runMusicScheduler(deck), 35);
+        backgroundDecks.add(deck);
+        runMusicScheduler(deck);
+        return deck;
+      }
+
+      function holdAudioParam(param, time) {
+        if (typeof param.cancelAndHoldAtTime === "function") {
+          param.cancelAndHoldAtTime(time);
+        } else {
+          const value = Math.max(.0001, param.value);
+          param.cancelScheduledValues(time);
+          param.setValueAtTime(value, time);
+        }
+      }
+
+      function destroyMusicDeck(deck) {
+        if (!deck || deck.stopped) return;
+        deck.stopped = true;
+        clearInterval(deck.timer);
+        backgroundDecks.delete(deck);
+        try { deck.input.disconnect(); } catch {}
+        try { deck.output.disconnect(); } catch {}
+        try { deck.send.disconnect(); } catch {}
+      }
+
+      function fadeOutMusicDeck(deck, seconds = 2.6) {
+        if (!deck || deck.stopped || !audioCtx) return;
+        const now = audioCtx.currentTime;
+        holdAudioParam(deck.output.gain, now);
+        deck.output.gain.exponentialRampToValueAtTime(.0001, now + seconds);
+        setTimeout(() => destroyMusicDeck(deck), (seconds + .45) * 1000);
+      }
+
+      function transitionBackgroundMusic(force = false) {
+        if (!atlasEntered || !audioCtx || !backgroundEnabled) return;
+        const area = areas[areaIndex];
+        const scale = getAreaScale(area, stage);
+        const signature = `${area.id}:${scale.name}:${gameMode}`;
+
+        if (!force && backgroundDeck?.signature === signature) return;
+
+        const oldDeck = backgroundDeck;
+        const nextDeck = createMusicDeck();
+        nextDeck.signature = signature;
+        backgroundDeck = nextDeck;
+
+        const now = audioCtx.currentTime;
+        const target = Math.max(.0001, nextDeck.profile.volume * backgroundDuck);
+        nextDeck.output.gain.setValueAtTime(.0001, now);
+        nextDeck.output.gain.exponentialRampToValueAtTime(target, now + 4.8);
+
+        if (oldDeck && oldDeck !== nextDeck) fadeOutMusicDeck(oldDeck, 4.2);
+      }
+
+      function stopBackgroundMusic(seconds = 1.2) {
+        const decks = [...backgroundDecks];
+        backgroundDeck = null;
+        decks.forEach(deck => fadeOutMusicDeck(deck, seconds));
+      }
+
+      function duckBackgroundMusic(multiplier = 1, seconds = .3) {
+        backgroundDuck = Math.max(.12, Math.min(1, multiplier));
+        if (!backgroundDeck || backgroundDeck.stopped || !audioCtx || !backgroundEnabled) return;
+        const now = audioCtx.currentTime;
+        holdAudioParam(backgroundDeck.output.gain, now);
+        const target = Math.max(.0001, backgroundDeck.profile.volume * backgroundDuck);
+        backgroundDeck.output.gain.exponentialRampToValueAtTime(target, now + seconds);
+      }
+
+      function startDrone() {
+        if (!audioCtx) return;
+        stopDrone();
+
+        const area = areas[areaIndex];
+        droneBus = audioCtx.createGain();
+        droneBus.gain.setValueAtTime(.0001, audioCtx.currentTime);
+        droneBus.gain.exponentialRampToValueAtTime(area.instrument === "raga" ? .055 : .018, audioCtx.currentTime + 1.8);
+        droneBus.connect(backgroundBus);
+
+        const roots = area.instrument === "raga"
+          ? [area.root / 2, area.root, area.root * 1.5]
+          : [area.root / 2, area.root * .75];
+
+        roots.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const filter = audioCtx.createBiquadFilter();
+          const gain = audioCtx.createGain();
+
+          osc.type = i === 0 ? "sine" : "triangle";
+          osc.frequency.value = freq;
+          osc.detune.value = i % 2 ? 4 : -4;
+          filter.type = "lowpass";
+          filter.frequency.value = area.instrument === "raga" ? 620 : 260;
+          gain.gain.value = i === 0 ? .75 : .22;
+
+          osc.connect(filter).connect(gain).connect(droneBus);
+          osc.start();
+          droneNodes.push(osc);
+        });
+      }
+
+      function stopDrone() {
+        if (droneBus && audioCtx) {
+          const now = audioCtx.currentTime;
+          droneBus.gain.cancelScheduledValues(now);
+          droneBus.gain.setTargetAtTime(.0001, now, .08);
+          droneNodes.forEach(node => {
+            try { node.stop(now + .5); } catch {}
+          });
+        }
+        droneNodes = [];
+        droneBus = null;
+      }
+
+      function animateTone(index, duration) {
+        const tone = dom.tones.children[index];
+        if (!tone) return;
+        tone.classList.remove("active");
+        void tone.offsetWidth;
+        tone.classList.add("active");
+        setTimeout(() => tone.classList.remove("active"), Math.max(250, duration * 700));
+      }
+
+      function generateSequence() {
+        const area = areas[areaIndex];
+        const count = dom.tones.children.length;
+        const length = area.lengths[stage - 1];
+        sequence = [];
+
+        while (sequence.length < length) {
+          let next = Math.floor(Math.random() * count);
+          const last = sequence.at(-1);
+          const before = sequence.at(-2);
+
+          if (sequence.length > 1 && next === last && last === before) {
+            next = (next + 1 + Math.floor(Math.random() * Math.max(1, count - 1))) % count;
+          }
+          sequence.push(next);
+        }
+
+        expected = area.mode[stage - 1] === "reverse"
+          ? [...sequence].reverse()
+          : [...sequence];
+      }
+
+      async function playSequence() {
+        if (playing) return;
+        await initAudio();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+        startDrone();
+        duckBackgroundMusic(.48, .32);
+
+        if (!sequence.length) generateSequence();
+
+        const area = areas[areaIndex];
+        const speed = area.speeds[stage - 1];
+        const mode = area.mode[stage - 1];
+        const blind = mode === "blind";
+
+        playing = true;
+        accepting = false;
+        userStep = 0;
+        dom.mainButton.disabled = true;
+        dom.listeningDot.classList.add("on");
+        [...dom.tones.children].forEach(t => t.classList.add("dim"));
+        setCopy(t("sequenceListen"), blind ? t("blindListen") : t("sequenceForm"));
+
+        await sleep(480);
+
+        for (const note of sequence) {
+          const tone = dom.tones.children[note];
+          if (!blind && tone) tone.classList.remove("dim");
+          if (blind && tone) tone.classList.add("hidden-pulse");
+          playTone(note, Math.min(.72, speed / 740), !blind);
+          await sleep(speed);
+          if (tone) {
+            tone.classList.add("dim");
+            tone.classList.remove("hidden-pulse");
+          }
+        }
+
+        [...dom.tones.children].forEach(t => t.classList.remove("dim", "hidden-pulse"));
+        dom.listeningDot.classList.remove("on");
+        playing = false;
+        accepting = true;
+        duckBackgroundMusic(1, .48);
+        dom.mainButton.disabled = false;
+        dom.mainButton.textContent = t("repeat");
+
+        if (mode === "reverse") {
+          setCopy(t("reverseTitle"), t("reverseBody"));
+        } else {
+          setCopy(t("answerNow"), t("answerBody"));
+        }
+      }
+
+      async function handleTone(index) {
+        if (playing || waitingForGate) return;
+        if (gameMode !== "free" && !accepting) return;
+        await initAudio();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+
+        playTone(index, .62, true);
+
+        if (gameMode === "free") {
+          const area = areas[areaIndex];
+          const scale = getAreaScale(area, stage);
+          const label = scale.labels[index] || String(index + 1);
+          const cents = scale.cents[index];
+          setCopy(label, cents === 0 ? t("rootCent") : t("aboveRoot", { cents }));
+          return;
+        }
+
+        if (index === expected[userStep]) {
+          userStep++;
+          const remaining = expected.length - userStep;
+
+          if (remaining === 0) {
+            accepting = false;
+            await sleep(260);
+            await completeStage();
+          } else {
+            setCopy(t("continue"), t("echoesLeft", { count: remaining }));
+          }
+        } else {
+          accepting = false;
+          playWrong();
+          screenFlash("bad");
+          showToast(t("traceBroken"));
+          setCopy(t("nearly"), t("repeatRoom"));
+          await sleep(850);
+          await playSequence();
+        }
+      }
+
+      function playWrong() {
+        if (!audioCtx || muted) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(118, now);
+        osc.frequency.exponentialRampToValueAtTime(63, now + .26);
+        envelope(gain, now, .12, .25, .006);
+        osc.connect(gain).connect(instrumentBus);
+        osc.start(now);
+        osc.stop(now + .3);
+      }
+
+      function playSuccess() {
+        if (!audioCtx || muted) return;
+        const count = dom.tones.children.length;
+        [0, Math.floor(count / 2), count - 1].forEach((note, i) => {
+          setTimeout(() => playTone(note, .9, true), i * 62);
+        });
+      }
+
+      async function completeStage() {
+        screenFlash("good");
+        playSuccess();
+
+        if (state.completed[areaIndex] < stage) {
+          state.completed[areaIndex] = stage;
+        }
+
+        updateJourney();
+        saveState();
+        buildMap();
+
+        if (stage < STAGES_PER_AREA) {
+          showToast(t("stageDone", { stage }));
+          setCopy(t("traceStored"), t("nextRoomOpening"));
+          await sleep(1200);
+          stage++;
+          sequence = [];
+          expected = [];
+          renderArea();
+          transitionBackgroundMusic(true);
+          await sleep(300);
+          await playSequence();
+          return;
+        }
+
+        if (areaIndex < CHALLENGE_AREA_COUNT - 1) {
+          if (state.unlockedArea < areaIndex + 1) {
+            state.unlockedArea = areaIndex + 1;
+          }
+          saveState();
+          buildMap();
+          waitingForGate = true;
+          dom.mainButton.disabled = false;
+          dom.mainButton.textContent = t("openGate");
+          setCopy(t("areaDone"), t("areaNowOpen", { area: areas[areaIndex + 1].title }));
+          showToast(t("gateOpened"));
+          return;
+        }
+
+        state.finaleSeen = true;
+        saveState();
+        updateJourney();
+        setCopy(t("atlasComplete"), t("atlasCompleteBody"));
+        await sleep(800);
+        dom.finale.classList.add("show");
+      }
+
+      async function playScaleDemo() {
+        if (playing) return;
+        await initAudio();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+        startDrone();
+        duckBackgroundMusic(.52, .32);
+        playing = true;
+        accepting = false;
+        dom.mainButton.disabled = true;
+        dom.listeningDot.classList.add("on");
+        setCopy(t("scaleMoves"), t("scaleMovesBody"));
+        const count = dom.tones.children.length;
+        const notes = [...Array(count).keys(), ...Array.from({ length: Math.max(0, count - 2) }, (_, i) => count - 2 - i)];
+        const speed = areas[areaIndex].category === "bonus" ? 230 : 280;
+        for (const note of notes) {
+          playTone(note, .5, true);
+          await sleep(speed);
+        }
+        dom.listeningDot.classList.remove("on");
+        playing = false;
+        accepting = true;
+        duckBackgroundMusic(1, .48);
+        dom.mainButton.disabled = false;
+        setCopy(t("playSpace"), t("freeTouch"));
+      }
+
+      async function mainAction() {
+        await initAudio();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+
+        if (gameMode === "free") {
+          await playScaleDemo();
+          return;
+        }
+
+        if (waitingForGate) {
+          waitingForGate = false;
+          selectArea(Math.min(areaIndex + 1, CHALLENGE_AREA_COUNT - 1));
+          await sleep(250);
+          await playSequence();
+          return;
+        }
+
+        await playSequence();
+      }
+
+      function updateJourney() {
+        const done = state.completed.slice(0, CHALLENGE_AREA_COUNT).reduce((sum, value) => sum + value, 0);
+        const total = CHALLENGE_AREA_COUNT * STAGES_PER_AREA;
+        dom.journeyLabel.textContent = gameMode === "free" ? `∞ · ${t("explore")}` : `${done} / ${total}`;
+        dom.journeyBar.style.width = gameMode === "free" ? "100%" : `${(done / total) * 100}%`;
+      }
+
+      function setCopy(title, body) {
+        dom.instruction.style.opacity = "0";
+        dom.instruction.style.transform = "translateY(4px)";
+        dom.subtext.style.opacity = "0";
+
+        setTimeout(() => {
+          dom.instruction.textContent = title;
+          dom.subtext.textContent = body;
+          dom.instruction.style.opacity = "1";
+          dom.instruction.style.transform = "translateY(0)";
+          dom.subtext.style.opacity = "1";
+        }, 150);
+      }
+
+      function showToast(text) {
+        clearTimeout(toastTimer);
+        dom.toast.textContent = text;
+        dom.toast.classList.add("show");
+        toastTimer = setTimeout(() => dom.toast.classList.remove("show"), 1450);
+      }
+
+      function screenFlash(type) {
+        dom.flash.classList.remove("good", "bad");
+        void dom.flash.offsetWidth;
+        dom.flash.classList.add(type);
+      }
+
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      async function enterAtlas(mode) {
+        await initAudio();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+        atlasEntered = true;
+        setGameMode(mode, false);
+        dom.splash.classList.add("closed");
+        if (mode === "challenge") setTimeout(() => playSequence(), 700);
+        else setCopy(t("playSpace"), t("noWrong"));
+      }
+
+      dom.languageButtons.forEach(button => {
+        button.addEventListener("click", () => setLanguage(button.dataset.lang));
+      });
+
+      dom.creatorTrigger.addEventListener("click", event => {
+        event.stopPropagation();
+        const open = dom.creatorMark.classList.toggle("open");
+        dom.creatorTrigger.setAttribute("aria-expanded", String(open));
+      });
+
+      document.addEventListener("click", event => {
+        if (dom.creatorMark.contains(event.target)) return;
+        dom.creatorMark.classList.remove("open");
+        dom.creatorTrigger.setAttribute("aria-expanded", "false");
+      });
+
+      dom.enterChallenge.addEventListener("click", () => enterAtlas("challenge"));
+      dom.enterFree.addEventListener("click", () => enterAtlas("free"));
+      dom.mainButton.addEventListener("click", mainAction);
+      dom.modeButton.addEventListener("click", () => setGameMode(gameMode === "free" ? "challenge" : "free"));
+
+      dom.musicButton.addEventListener("click", async () => {
+        await initAudio();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+
+        backgroundEnabled = !backgroundEnabled;
+        dom.musicButton.classList.toggle("music-on", backgroundEnabled);
+        dom.musicButton.classList.toggle("music-off", !backgroundEnabled);
+        dom.musicButton.textContent = backgroundEnabled ? "♫" : "·";
+        dom.musicButton.setAttribute(
+          "aria-label",
+          backgroundEnabled ? t("musicOnAria") : t("musicOffAria")
+        );
+
+        if (backgroundEnabled) {
+          transitionBackgroundMusic(true);
+          showToast(t("backgroundOn"));
+        } else {
+          stopBackgroundMusic(1.1);
+          showToast(t("backgroundOff"));
+        }
+      });
+
+      dom.scaleButton.addEventListener("click", () => {
+        if (gameMode !== "free" || playing) return;
+        const variants = getFreeScales(areas[areaIndex]);
+        freeScaleIndex[areaIndex] = (freeScaleIndex[areaIndex] + 1) % variants.length;
+        stopDrone();
+        renderArea();
+        startDrone();
+        transitionBackgroundMusic(true);
+        showToast(getAreaScale(areas[areaIndex], stage).name);
+      });
+
+      dom.soundButton.addEventListener("click", async () => {
+        await initAudio();
+        if (audioCtx.state === "suspended") await audioCtx.resume();
+
+        muted = !muted;
+        applyMasterGain();
+        updateVolumeUi();
+        showToast(muted ? t("soundOff") : t("soundOn"));
+      });
+
+      dom.backgroundVolumeSlider.addEventListener("input", async () => {
+        backgroundVolume = Math.max(
+          0,
+          Math.min(1, Number(dom.backgroundVolumeSlider.value) / 100)
+        );
+        saveChannelVolume(BACKGROUND_VOLUME_KEY, backgroundVolume);
+        if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+        applyChannelGains();
+        updateVolumeUi();
+      });
+
+      dom.backgroundVolumeSlider.addEventListener("change", () => {
+        showToast(t("ambienceVolume", { value: Math.round(backgroundVolume * 100) }));
+      });
+
+      dom.instrumentVolumeSlider.addEventListener("input", async () => {
+        instrumentVolume = Math.max(
+          0,
+          Math.min(1, Number(dom.instrumentVolumeSlider.value) / 100)
+        );
+        saveChannelVolume(INSTRUMENT_VOLUME_KEY, instrumentVolume);
+        if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+        applyChannelGains();
+        updateVolumeUi();
+      });
+
+      dom.instrumentVolumeSlider.addEventListener("change", () => {
+        showToast(t("instrumentVolume", { value: Math.round(instrumentVolume * 100) }));
+      });
+
+      dom.resetButton.addEventListener("click", () => {
+        const confirmed = confirm(t("resetConfirm"));
+        if (!confirmed) return;
+        try { localStorage.removeItem(STORAGE_KEY); } catch {}
+        state = defaultState();
+        areaIndex = 0;
+        gameMode = "challenge";
+        document.body.classList.remove("free-mode");
+        dom.modeButton.classList.remove("active");
+        dom.modeButton.textContent = t("freeModeButton");
+        freeScaleIndex = Array(areas.length).fill(0);
+        stage = 1;
+        sequence = [];
+        expected = [];
+        waitingForGate = false;
+        stopDrone();
+        buildMap();
+        renderArea();
+        updateJourney();
+        if (atlasEntered && backgroundEnabled) transitionBackgroundMusic(true);
+        showToast(t("atlasReset"));
+      });
+
+      dom.closeFinale.addEventListener("click", () => {
+        dom.finale.classList.remove("show");
+        waitingForGate = false;
+        dom.mainButton.textContent = t("listenAgain");
+      });
+
+      window.addEventListener("keydown", event => {
+        if (event.repeat) return;
+
+        if (event.key === "Escape" && dom.creatorMark.classList.contains("open")) {
+          dom.creatorMark.classList.remove("open");
+          dom.creatorTrigger.setAttribute("aria-expanded", "false");
+          dom.creatorTrigger.focus();
+          return;
+        }
+
+        const toneKeys = {
+          "1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 5,
+          "7": 6, "8": 7, "9": 8, "0": 9, "-": 10, "=": 11
+        };
+
+        if (Object.prototype.hasOwnProperty.call(toneKeys, event.key)) {
+          handleTone(toneKeys[event.key]);
+        } else if (event.key === " " || event.key === "Enter") {
+          event.preventDefault();
+          if (!dom.splash.classList.contains("closed")) dom.enterChallenge.click();
+          else dom.mainButton.click();
+        } else if (event.key.toLowerCase() === "m") {
+          dom.soundButton.click();
+        } else if (event.key.toLowerCase() === "b") {
+          dom.musicButton.click();
+        } else if (event.key === "[" || event.key === "_") {
+          instrumentVolume = Math.max(
+            0,
+            Math.round(instrumentVolume * 100 - 5) / 100
+          );
+          saveChannelVolume(INSTRUMENT_VOLUME_KEY, instrumentVolume);
+          applyChannelGains();
+          updateVolumeUi();
+        } else if (event.key === "]" || event.key === "+") {
+          instrumentVolume = Math.min(
+            1,
+            Math.round(instrumentVolume * 100 + 5) / 100
+          );
+          saveChannelVolume(INSTRUMENT_VOLUME_KEY, instrumentVolume);
+          applyChannelGains();
+          updateVolumeUi();
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (!audioCtx) return;
+        if (document.hidden) audioCtx.suspend();
+      });
+
+      // Quiet animated star / dust field.
+      const ctx = dom.canvas.getContext("2d");
+      let particles = [];
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+
+      function initField() {
+        dpr = Math.min(2, window.devicePixelRatio || 1);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        dom.canvas.width = Math.floor(width * dpr);
+        dom.canvas.height = Math.floor(height * dpr);
+        dom.canvas.style.width = `${width}px`;
+        dom.canvas.style.height = `${height}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const count = Math.max(45, Math.floor((width * height) / 19000));
+        particles = Array.from({ length: count }, () => ({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          r: Math.random() * 1.25 + .25,
+          a: Math.random() * .32 + .05,
+          v: Math.random() * .075 + .015,
+          phase: Math.random() * Math.PI * 2
+        }));
+      }
+
+      function drawField(time = 0) {
+        ctx.clearRect(0, 0, width, height);
+        const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "220,230,255";
+
+        particles.forEach((p, i) => {
+          p.y -= p.v;
+          p.x += Math.sin(time * .00015 + p.phase) * .015;
+          if (p.y < -4) {
+            p.y = height + 4;
+            p.x = Math.random() * width;
+          }
+
+          const pulse = .55 + Math.sin(time * .0007 + p.phase) * .25;
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${accent}, ${p.a * pulse})`;
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (i % 11 === 0) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(${accent}, ${p.a * .09})`;
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x, p.y + 18);
+            ctx.stroke();
+          }
+        });
+
+        requestAnimationFrame(drawField);
+      }
+
+      window.addEventListener("resize", initField);
+      init();
+    })();
+  </script>
+</body>
+</html>
