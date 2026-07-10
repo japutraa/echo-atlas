@@ -1381,7 +1381,7 @@
   Copyright (C) 2026 Adrian Janitra Putra
   SPDX-License-Identifier: GPL-3.0-only
 -->
-<!-- Echo Atlas: ID / EN / DE Multilingual edition · by japutraa -->
+<!-- Echo Atlas: ID / EN / DE · by japutraa · Ambience toggle 0% / 50% -->
   <script>
 (() => {
       const STORAGE_KEY = "echo-atlas-progress-v1";
@@ -1792,9 +1792,9 @@
       let gameMode = "challenge";
       let freeScaleIndex = Array(areas.length).fill(0);
 
-      // Generative lounge/house soundtrack.
+      // Generative ambient soundtrack.
       let atlasEntered = false;
-      let backgroundEnabled = true;
+      let backgroundEnabled = backgroundVolume > .001;
       let backgroundDeck = null;
       let backgroundDuck = 1;
       let backgroundNoise = null;
@@ -1868,11 +1868,23 @@
       function updateVolumeUi() {
         const backgroundPct = Math.round(backgroundVolume * 100);
         const instrumentPct = Math.round(instrumentVolume * 100);
+        backgroundEnabled = backgroundVolume > .001;
 
         if (dom.backgroundVolumeSlider) dom.backgroundVolumeSlider.value = String(backgroundPct);
         if (dom.instrumentVolumeSlider) dom.instrumentVolumeSlider.value = String(instrumentPct);
         if (dom.backgroundVolumeValue) dom.backgroundVolumeValue.textContent = `${backgroundPct}%`;
         if (dom.instrumentVolumeValue) dom.instrumentVolumeValue.textContent = `${instrumentPct}%`;
+
+        if (dom.musicButton) {
+          dom.musicButton.classList.toggle("music-on", backgroundEnabled);
+          dom.musicButton.classList.toggle("music-off", !backgroundEnabled);
+          dom.musicButton.textContent = backgroundEnabled ? "♫" : "·";
+          dom.musicButton.setAttribute(
+            "aria-label",
+            backgroundEnabled ? t("musicOnAria") : t("musicOffAria")
+          );
+          dom.musicButton.title = `${t("musicTitle")} · ${backgroundPct}%`;
+        }
 
         if (dom.soundButton) {
           dom.soundButton.textContent = soundGlyph();
@@ -3893,7 +3905,7 @@
       }
 
       function startDrone() {
-        if (!audioCtx) return;
+        if (!audioCtx || !backgroundEnabled || backgroundVolume <= .001) return;
         stopDrone();
 
         const area = areas[areaIndex];
@@ -4247,22 +4259,25 @@
         await initAudio();
         if (audioCtx.state === "suspended") await audioCtx.resume();
 
-        backgroundEnabled = !backgroundEnabled;
-        dom.musicButton.classList.toggle("music-on", backgroundEnabled);
-        dom.musicButton.classList.toggle("music-off", !backgroundEnabled);
-        dom.musicButton.textContent = backgroundEnabled ? "♫" : "·";
-        dom.musicButton.setAttribute(
-          "aria-label",
-          backgroundEnabled ? t("musicOnAria") : t("musicOffAria")
-        );
+        const turningOn = backgroundVolume <= .001;
+        backgroundVolume = turningOn ? .50 : 0;
+        backgroundEnabled = turningOn;
 
-        if (backgroundEnabled) {
+        saveChannelVolume(BACKGROUND_VOLUME_KEY, backgroundVolume);
+        applyChannelGains();
+        updateVolumeUi();
+
+        if (turningOn) {
+          startDrone();
           transitionBackgroundMusic(true);
-          showToast(t("backgroundOn"));
         } else {
+          stopDrone();
           stopBackgroundMusic(1.1);
-          showToast(t("backgroundOff"));
         }
+
+        showToast(t("ambienceVolume", {
+          value: Math.round(backgroundVolume * 100)
+        }));
       });
 
       dom.scaleButton.addEventListener("click", () => {
@@ -4287,14 +4302,28 @@
       });
 
       dom.backgroundVolumeSlider.addEventListener("input", async () => {
+        const wasEnabled = backgroundEnabled;
+
         backgroundVolume = Math.max(
           0,
           Math.min(1, Number(dom.backgroundVolumeSlider.value) / 100)
         );
+        backgroundEnabled = backgroundVolume > .001;
+
         saveChannelVolume(BACKGROUND_VOLUME_KEY, backgroundVolume);
         if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
         applyChannelGains();
         updateVolumeUi();
+
+        if (!atlasEntered || !audioCtx) return;
+
+        if (wasEnabled && !backgroundEnabled) {
+          stopDrone();
+          stopBackgroundMusic(1.1);
+        } else if (!wasEnabled && backgroundEnabled) {
+          startDrone();
+          transitionBackgroundMusic(true);
+        }
       });
 
       dom.backgroundVolumeSlider.addEventListener("change", () => {

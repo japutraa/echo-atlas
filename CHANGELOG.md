@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3 — 2026-07-10
+
+- Replaced the independent background on/off state with direct Ambience control.
+- The music button now switches Ambience between 0% and 50%.
+- The button state now follows the Ambience slider.
+- Background generators stop when Ambience reaches 0%.
+
 ## 1.0.2 — 2026-07-10
 
 - Added the public GitHub Pages URL.

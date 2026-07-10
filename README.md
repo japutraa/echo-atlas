@@ -81,7 +81,7 @@ https://japutraa.github.io/echo-atlas/
 | `1`–`0`, `-`, `=` | Play tone buttons |
 | `Space` or `Enter` | Listen / continue |
 | `M` | Mute or unmute all sound |
-| `B` | Toggle generative ambience |
+| `B` | Switch Ambience between 0% and 50% |
 | `[` / `]` | Lower / raise instrument volume |
 | `Escape` | Close the creator easter egg |
 
