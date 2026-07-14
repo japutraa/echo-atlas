@@ -1,48 +1,28 @@
 # Repository setup
 
-## Repository
+## Repository identity
 
 - Owner: `japutraa`
-- Repository name: `echo-atlas`
-- Repository URL: https://github.com/japutraa/echo-atlas
-- Live game URL: https://japutraa.github.io/echo-atlas/
+- Repository: `echo-atlas`
+- Source: https://github.com/japutraa/echo-atlas
+- Live game: https://japutraa.github.io/echo-atlas/
 
-## GitHub About
+## First deployment
 
-**Description**
+1. Push all files to the `main` branch.
+2. Open **Settings → Pages**.
+3. Select **GitHub Actions** as the source.
+4. Run or wait for `.github/workflows/deploy-pages.yml`.
+5. Visit https://japutraa.github.io/echo-atlas/
 
-```text
-A multilingual ambient listening puzzle and scale explorer built with the Web Audio API.
-```
+## Updating the game
 
-**Website**
+Edit the relevant file:
 
-```text
-https://japutraa.github.io/echo-atlas/
-```
+- interface or layout: `index.html`
+- design: `css/styles.css`
+- translations: `js/i18n.js`
+- scales and areas: `js/areas.js`
+- behavior and audio: `js/app.js`
 
-**Topics**
-
-```text
-web-audio
-music-game
-ambient
-microtonal
-music-theory
-browser-game
-generative-music
-javascript
-multilingual
-github-pages
-```
-
-## GitHub Pages
-
-After pushing to `main`:
-
-1. Open **Settings → Pages**.
-2. Choose **GitHub Actions** under Build and deployment.
-3. Open the **Actions** tab and confirm that `Deploy Echo Atlas to GitHub Pages` succeeds.
-4. Visit https://japutraa.github.io/echo-atlas/
-
-The public URL only becomes active after the first successful Pages deployment.
+Every push to `main` triggers validation and a new Pages deployment.

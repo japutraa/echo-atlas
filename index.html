@@ -1,409 +1,170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <!-- Copyright (C) 2026 Adrian Janitra Putra. Licensed under GNU GPL v3 or later. -->
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta
-      http-equiv="Cache-Control"
-      content="no-cache, no-store, must-revalidate"
-    />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <meta
-      name="description"
-      content="Perang Narasi: Republik Timeline, game satire politik Indonesia karya Adrian Janitra Putra tentang kampanye, buzzer, aktivisme, propaganda, special event politik, dan literasi demokrasi."
-    />
-    <meta name="author" content="Adrian Janitra Putra" />
-    <meta name="creator" content="Adrian Janitra Putra" />
-    <meta name="application-name" content="Perang Narasi: Republik Timeline" />
-    <meta name="version" content="3.16.0" />
-    <meta name="theme-color" content="#0b0b0a" />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="id_ID" />
-    <meta property="og:title" content="Perang Narasi — Republik Timeline" />
-    <meta
-      property="og:description"
-      content="Game satire politik Indonesia tentang buzzer, aktivisme, propaganda, dan literasi demokrasi. Karya Adrian Janitra Putra."
-    />
-    <meta
-      property="og:url"
-      content="https://japutraa.github.io/perang-narasi-republik-timeline/"
-    />
-    <meta name="twitter:card" content="summary" />
-    <link
-      rel="canonical"
-      href="https://japutraa.github.io/perang-narasi-republik-timeline/"
-    />
-    <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
-    <title>Perang Narasi — Republik Timeline</title>
-    <link rel="stylesheet" href="assets/css/game.css" />
-  </head>
-  <body>
-    <noscript><div class="boot-error">Game membutuhkan JavaScript. Aktifkan JavaScript lalu muat ulang halaman.</div></noscript>
-    <div id="bootError" class="boot-error hidden" role="alert"></div>
-    <div class="app">
-      <header class="masthead">
-        <div class="brand">
-          <h1>Perang Narasi</h1>
-          <p>
-            Republik Timeline • 6 fase politik • 72 bulan • special event •
-            autosave • demokrasi baterai 12%
-          </p>
-        </div>
-        <div>
-          <div class="stamp">
-            BUILD 3.16.0 • 14 JULI 2026<br />Semua nama politik adalah plesetan • arsip faktual berhenti di Juli 2026
-          </div>
-          <label class="switch" style="margin-top: 9px"
-            ><input id="soundToggle" type="checkbox" checked /> bunyi kantor
-            propaganda</label
-          >
-        </div>
-      </header>
-      <div class="ticker" aria-live="polite">
-        <span id="breakingTicker"
-          >REPUBLIK TIMELINE: SATU PEMILU • LIMA TAHUN KEKUASAAN • LALU PEMILU
-          LAGI • SAVE LOKAL AKTIF • DEMOKRASI MASIH MENCARI CHARGER •
-        </span>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#080a10" />
+  <meta name="description" content="Echo Atlas is a multilingual, generative ambient music puzzle and scale explorer by japutraa." />
+  <meta name="author" content="Adrian Janitra Putra" />
+  <meta property="og:title" content="Echo Atlas — by japutraa" />
+  <meta property="og:description" content="A multilingual ambient listening puzzle and scale explorer." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://japutraa.github.io/echo-atlas/" />
+  <link rel="canonical" href="https://japutraa.github.io/echo-atlas/" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Echo Atlas — by japutraa</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="language-switch" id="languageSwitch" aria-label="Language">
+    <button data-lang="id">ID</button>
+    <button data-lang="en">EN</button>
+    <button data-lang="de">DE</button>
+  </div>
+  <canvas id="field"></canvas>
+  <div class="veil"></div>
+  <div class="grain"></div>
+
+  <div class="app">
+    <header>
+      <div class="brand">
+        <p class="eyebrow" id="brandEyebrow">A cartography of listening</p>
+        <h1>Echo<br>Atlas</h1>
       </div>
 
-      <main id="startScreen">
-        <section class="hero">
-          <div class="box">
-            <h2>
-              Enam tahun di Republik Timeline: dari pemilu ke pemilu berikutnya.
-            </h2>
-            <p class="lead">
-              Mulai sebagai relawan paslon atau aktivis timeline, lalu jalani
-              <b>72 bulan</b> politik Indonesia: Pemilu 2024, lima tahun
-              kekuasaan, dan Pemilu 2029. Arsip 2024–Juli 2026 mengambil
-              inspirasi dari peristiwa nyata; bulan-bulan setelahnya menjadi
-              skenario satire. Pilihanmu membentuk
-              karier, kualitas demokrasi, jaringan, dan jenis ruang publik yang
-              diwariskan ke pemilu berikutnya. Tiap bulan punya beberapa post
-              alternatif dan satu akun fokus, jadi kombinasi timeline berubah
-              ketika kamu memulai campaign baru.
-            </p>
-            <div class="campaign-strip">
-              <div class="phase-chip"><b>01</b>Pemilu 2024</div>
-              <div class="phase-chip"><b>02</b>Tahun Pertama</div>
-              <div class="phase-chip"><b>03</b>Tekanan 2026</div>
-              <div class="phase-chip"><b>04</b>Proyeksi 2027</div>
-              <div class="phase-chip"><b>05</b>Pra-Pemilu 2028</div>
-              <div class="phase-chip"><b>06</b>Pemilu 2029</div>
-            </div>
-            <div class="warning">
-              <b>Desain satir:</b> Tokoh nyata hanya menjadi referensi mengenai
-              peran publik yang terdokumentasi. Karakter permainan adalah
-              plesetan atau gabungan berbagai fenomena. Dukungan politik,
-              jabatan publik, dan kerja komunikasi tidak otomatis berarti
-              seseorang adalah buzzer berbayar.
-            </div>
-            <div class="settings-card">
-              <div>
-                <b>Cek Nalar</b>
-                <p>
-                  Kuis literasi politik opsional setelah setiap bulan permainan.
-                </p>
-              </div>
-              <div class="mode-picker" aria-label="Pilihan Cek Nalar">
-                <button
-                  type="button"
-                  class="mode-option active"
-                  id="quizStartOn"
-                >
-                  ON — PAKAI<small
-                    >Kuis muncul setelah bulan selesai.</small
-                  ></button
-                ><button type="button" class="mode-option" id="quizStartOff">
-                  OFF — LEWATI<small>Kronik berjalan tanpa kuis.</small>
-                </button>
-              </div>
-              <input id="quizStartToggle" type="checkbox" checked hidden />
-            </div>
-            <div class="settings-card game-mode-card">
-              <div>
-                <b>Mode Permainan</b>
-                <p>
-                  Jalani kronik dari 2024 atau buka sandbox dan lompat ke fase
-                  politik mana saja.
-                </p>
-              </div>
-              <div>
-                <div class="mode-picker" aria-label="Pilihan mode permainan">
-                  <button
-                    type="button"
-                    class="mode-option active"
-                    id="chronicleModeBtn"
-                  >
-                    KRONIK<small>Mulai dari Fase 1 dan ikuti 72 bulan.</small>
-                  </button>
-                  <button type="button" class="mode-option" id="freeModeBtn">
-                    MODE BEBAS<small>Pilih fase awal dan lompat kapan saja.</small>
-                  </button>
-                </div>
-                <div id="freePhasePicker" class="free-phase-picker hidden">
-                  <b>PILIH FASE AWAL</b>
-                  <div class="free-phase-grid">
-                    <button type="button" class="free-phase-option active" data-free-phase="0"><span>01</span>2024</button>
-                    <button type="button" class="free-phase-option" data-free-phase="1"><span>02</span>2025</button>
-                    <button type="button" class="free-phase-option" data-free-phase="2"><span>03</span>2026</button>
-                    <button type="button" class="free-phase-option" data-free-phase="3"><span>04</span>2027</button>
-                    <button type="button" class="free-phase-option" data-free-phase="4"><span>05</span>2028</button>
-                    <button type="button" class="free-phase-option" data-free-phase="5"><span>06</span>2029</button>
-                  </div>
-                  <small>Mode Bebas memakai kondisi sandbox yang disesuaikan dengan fase pilihan.</small>
-                </div>
-              </div>
-            </div>
-            <div id="continuePanel" class="continue-panel hidden">
-              <div>
-                <b>LANJUTKAN KRONIK</b
-                ><span id="continueSummary">Save lokal ditemukan.</span>
-              </div>
-              <button class="btn" id="continueBtn" type="button">
-                Continue</button
-              ><button class="btn secondary" id="deleteSaveBtn" type="button">
-                Hapus Save
-              </button>
-            </div>
-            <div class="role-grid">
-              <article class="role-card" tabindex="0" data-role="buzzer">
-                <div class="icon">🗳️📱</div>
-                <h3>Relawan Paslon</h3>
-                <p>
-                  Kamu percaya kandidatmu adalah masa depan. Agensi percaya kamu
-                  adalah tenaga kerja yang belum tahu rate card.
-                </p>
-                <ul>
-                  <li>Mulai dari perang meme pemilu</li>
-                  <li>Bisa naik menjadi operator istana</li>
-                  <li>Akses cepat, kepercayaan mudah rusak</li>
-                </ul>
-                <span class="choose">MULAI OPERASI →</span>
-              </article>
-              <article class="role-card" tabindex="0" data-role="aktivis">
-                <div class="icon">🧵📢</div>
-                <h3>Aktivis Timeline</h3>
-                <p>
-                  Kamu membuat utas karena marah. Tiga orang membaca sampai
-                  habis, salah satunya akunmu sendiri.
-                </p>
-                <ul>
-                  <li>Naik dari netizen ke kampus dan masyarakat sipil</li>
-                  <li>Bisa menjadi pakar, pembuat film, atau personal brand</li>
-                  <li>Data kuat, burnout sangat nyata</li>
-                </ul>
-                <span class="choose">MULAI MELAWAN →</span>
-              </article>
-            </div>
-          </div>
-          <aside class="box poster">
-            <div class="big">MENANG<br />PEMILU.<br />LALU<br />APA?</div>
-            <blockquote>
-              “Kekuasaan ingin didengar. Gerakan ingin dipercaya. Algoritma
-              hanya ingin semuanya marah lebih lama.”
-            </blockquote>
-            <small
-              >Versi 3.16.0 • Voiceprint Roster<br /><span
-                class="author-credit"
-                >GNU GPL v3 • Game by
-                <a
-                  href="https://github.com/japutraa"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Adrian Janitra Putra"
-                  >Adrian Janitra Putra / japutraa</a
-                ></span
-              ></small
-            >
-          </aside>
-        </section>
-      </main>
+      <div class="place">
+        <p class="micro-label" id="activeAreaLabel">Area aktif</p>
+        <strong id="areaTitle">Lumen</strong>
+        <span id="areaSubtitle">Diatonis · cahaya pertama</span>
+      </div>
+    </header>
 
-      <main id="gameScreen" class="hidden">
-        <div class="game-layout">
-          <aside class="sidebar">
-            <section class="panel">
-              <div class="panel-title">
-                <span>Karier Politik</span><span id="roleLabel">—</span>
-              </div>
-              <div class="panel-body">
-                <div id="phaseLabel" class="phase-badge">FASE 1</div>
-                <div class="day-badge">BULAN <span id="day">1</span>/12</div>
-                <div id="calendarLabel" class="calendar-label">
-                  JANUARI 2024
-                </div>
-                <div id="rank" class="rank">—</div>
-                <p id="objective" class="objective"></p>
-                <div class="money-label" id="moneyLabel">DANA OPERASI</div>
-                <div id="money" class="money">Rp0</div>
-                <div id="debtPanel" class="debt-panel hidden">
-                  UTANG OPERASI: <b id="debtAmount">Rp0</b><br />
-                  BUNGA BULANAN: <span id="debtRate">0%</span>
-                  <button type="button" id="financeBtn">KELOLA CICILAN</button>
-                </div>
-                <div class="price-scale-note"></div>
-                <div class="event-count" id="eventCount">SPECIAL EVENT 0</div>
-                <div class="phase-map" id="phaseMap"></div>
-              </div>
-            </section>
-            <section class="panel">
-              <div class="panel-title">
-                <span>Indikator</span><span>LIVE</span>
-              </div>
-              <div class="panel-body" id="stats"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title">
-                <span>Tim & Mentor</span><span id="teamMood">😐</span>
-              </div>
-              <div class="panel-body" id="teamBox"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title">
-                <span>Pengaturan</span><span id="quizModeLabel">NALAR ON</span>
-              </div>
-              <div class="panel-body">
-                <button
-                  type="button"
-                  id="quizGameButton"
-                  class="mode-toggle-btn"
-                >
-                  CEK NALAR: ON</button
-                ><input id="quizGameToggle" type="checkbox" checked hidden />
-                <div class="quiz-status">
-                  Klik untuk ON/OFF kapan saja. Tidak ada penalti.
-                </div>
-              </div>
-            </section>
-            <div class="btn-row">
-              <button id="endDayBtn" class="btn">Akhiri Bulan</button
-              ><button id="glossaryBtn" class="btn secondary">Kamus</button
-              ><button id="careerBtn" class="btn secondary">Karier</button
-              ><button id="castBtn" class="btn secondary">Tokoh</button
-              ><button id="freeJumpBtn" class="btn secondary hidden">Lompat Fase</button
-              ><button id="saveBtn" class="btn secondary">Simpan</button
-              ><button id="resetBtn" class="btn secondary">Menu Utama</button>
-            </div>
-          </aside>
-          <section class="main panel">
-            <div class="feed-head">
-              <h2 id="issueTitle">Trending</h2>
-              <span class="live">● TIMELINE NASIONAL</span>
-            </div>
-            <article class="post">
-              <div class="post-author">
-                <div class="avatar" id="npcAvatar">🧑</div>
-                <div>
-                  <b id="npcName">Netizen</b>
-                  <div class="handle" id="npcHandle">@warga</div>
-                </div>
-              </div>
-              <div id="postText" class="post-text"></div>
-              <div class="post-meta">
-                <button
-                  class="metric-button"
-                  data-metric="reposts"
-                  title="Lihat dampak repost"
-                >
-                  ↻ <b id="reposts">0</b></button
-                ><button
-                  class="metric-button"
-                  data-metric="likes"
-                  title="Lihat dampak likes"
-                >
-                  ♥ <b id="likes">0</b></button
-                ><button
-                  class="metric-button"
-                  data-metric="replies"
-                  title="Buka kolom komentar"
-                >
-                  💬 <b id="replies">0</b></button
-                ><button
-                  class="metric-button"
-                  data-metric="views"
-                  title="Lihat analitik tayangan"
-                >
-                  👁 <b id="views">0</b>
-                </button>
-              </div>
-              <div id="timelineImpact" class="timeline-impact"></div>
-              <div class="tweet-analytics-note">
-                Klik angka engagement untuk melihat komentar, sentimen, dan
-                siapa yang sebenarnya terpengaruh.
-              </div>
-            </article>
-            <div class="battle">
-              <div class="opponent">
-                <div class="mini-stat">
-                  <b>KETAHANAN NARASI LAWAN</b>
-                  <div class="bar red">
-                    <i id="resolveBar" style="width: 100%"></i>
-                  </div>
-                </div>
-                <div class="mini-stat">
-                  <b>SUHU TIMELINE</b>
-                  <div class="bar yellow">
-                    <i id="heatBar" style="width: 30%"></i>
-                  </div>
-                </div>
-              </div>
-              <p
-                style="margin: 8px 0 12px; color: var(--muted); font-size: 11px"
-              >
-                Menguasai percakapan bukan sama dengan membuktikan kebenaran.
-                Sayangnya, dashboard agensi tidak punya kolom untuk itu.
-              </p>
-              <div id="cards" class="card-grid"></div>
-            </div>
-          </section>
-          <aside class="rightbar">
-            <section class="panel">
-              <div class="panel-title">
-                <span>Ruang Strategi</span
-                ><span id="specialtyLabel">GENERALIS</span>
-              </div>
-              <div class="panel-body">
-                <div id="strategyLesson" class="lesson"></div>
-                <div id="battleLog" class="log"></div>
-              </div>
-            </section>
-            <section class="panel">
-              <div class="panel-title">
-                <span>Arsip Fakta</span><span>SUMBER</span>
-              </div>
-              <div class="panel-body" id="facts"></div>
-            </section>
-          </aside>
+    <nav class="map" id="map" aria-label="Peta perjalanan">
+      <p class="map-title">Atlas bunyi</p>
+    </nav>
+
+    <main>
+      <section class="world" aria-label="Puzzle nada">
+        <div class="ring"></div>
+        <div class="orbit-line"></div>
+        <div class="tones" id="tones"></div>
+
+        <div class="center">
+          <div class="stage" id="stageLabel">Tahap 01 / 04</div>
+          <h2 id="instruction">Tekan dengarkan.</h2>
+          <p id="subtext">Ruang akan memainkan jejak pertamanya.</p>
+          <div class="listening-dot" id="listeningDot"></div>
         </div>
-      </main>
-      <footer class="footer-note">
-        Satire bukan pengganti verifikasi. Jangan menganggap plesetan sebagai
-        biografi, dan jangan menganggap engagement sebagai mandat rakyat.
-        <div class="credit-line">
-          <span>GNU GPL v3</span><span>•</span><span>Game by</span
-          ><a
-            href="https://github.com/japutraa"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="GitHub japutraa — Adrian Janitra Putra"
-            >Adrian Janitra Putra / japutraa</a
-          >
+      </section>
+    </main>
+
+    <aside class="info">
+      <div class="info-card">
+        <div>
+          <p class="micro-label" id="toneSystemLabel">Sistem nada</p>
+          <h3 id="scaleName">Mayor diatonis</h3>
         </div>
-      </footer>
+        <p id="scaleText">Interval yang terang dan familiar. Perjalanan dimulai dari jarak nada yang mudah dibaca.</p>
+        <div class="scale-notes" id="scaleNotes"></div>
+        <button class="scale-cycle" id="scaleButton">Ganti scale</button>
+        <div class="modifier" id="modifier">
+          <b>→</b>
+          <span>Jawab dalam urutan yang sama.</span>
+        </div>
+      </div>
+    </aside>
+
+    <footer>
+      <div class="controls">
+        <button class="pill" id="mainButton">Dengarkan</button>
+        <button class="pill mode-pill" id="modeButton">Mode bebas</button>
+        <button class="round music-on" id="musicButton" aria-label="Matikan musik latar" title="Ambient generatif">♫</button>
+        <div class="volume-cradle" aria-label="Pengaturan suara">
+          <button class="round" id="soundButton" aria-label="Matikan semua suara" title="Mute semua suara">◖</button>
+          <div class="volume-panel" id="volumePanel">
+            <label class="volume-line" for="backgroundVolumeSlider">
+              <span class="volume-icon">♫</span>
+              <span class="volume-mini" id="ambienceLabel">Ambience</span>
+              <input type="range" id="backgroundVolumeSlider" min="0" max="100" step="1" value="55" aria-label="Volume musik latar">
+              <span class="volume-readout" id="backgroundVolumeValue">55%</span>
+            </label>
+            <label class="volume-line" for="instrumentVolumeSlider">
+              <span class="volume-icon">◉</span>
+              <span class="volume-mini" id="instrumentLabel">Instrument</span>
+              <input type="range" id="instrumentVolumeSlider" min="0" max="100" step="1" value="82" aria-label="Volume instrumen dan puzzle">
+              <span class="volume-readout" id="instrumentVolumeValue">82%</span>
+            </label>
+          </div>
+        </div>
+        <button class="round" id="resetButton" aria-label="Hapus progres" title="Hapus progres">↺</button>
+      </div>
+
+      <div class="journey">
+        <div class="journey-head">
+          <span id="journeyTitle">Perjalanan</span>
+          <span id="journeyLabel">0 / 24</span>
+        </div>
+        <div class="journey-track"><div id="journeyBar"></div></div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="splash" id="splash">
+    <div class="splash-card">
+      <div class="splash-symbol"></div>
+      <p class="micro-label" id="splashTag">Sebuah puzzle musik untuk headphone</p>
+      <h2>Echo<br>Atlas</h2>
+      <p class="lead" id="splashLead">
+        Jelajahi tangga nada dunia sebagai puzzle, atau buka Free Mode untuk memainkan
+        semua wilayah dan distrik genre modern tanpa jawaban benar maupun salah.
+      </p>
+      <div class="splash-actions">
+        <button id="enterChallenge">Mulai perjalanan</button>
+        <button class="secondary" id="enterFree">Jelajah bebas</button>
+      </div>
+      <small id="splashSmall">Challenge menyimpan progres · Free Mode membuka seluruh atlas · dua belas taman bunyi bergerak sebagai ritual ambient yang saling berbaur</small>
     </div>
-    <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
-      <div class="modal-card" id="modalContent"></div>
+  </div>
+
+  <div class="finale" id="finale">
+    <div class="finale-card">
+      <p class="micro-label" id="finaleTag">Atlas selesai</p>
+      <h2 id="finaleTitle">Kau telah sampai<br>di antara nada.</h2>
+      <p id="finaleBody">
+        Yang berubah bukan hanya tingkat kesulitan, tetapi cara telinga membagi jarak.
+        Jalur puzzle utama selesai. Hidden Gardens tetap dapat dijelajahi melalui Free Mode.
+      </p>
+      <button id="closeFinale">Kembali ke atlas</button>
     </div>
-    <div id="flash" class="flash hidden"></div>
-    <script src="assets/js/runtime.js" defer></script>
-    <script src="assets/js/netizen-pack.js" defer></script>
-    <script src="assets/js/character-voices.js" defer></script>
-    <script src="assets/js/timeline-variants.js" defer></script>
-    <script src="assets/js/ending-system.js" defer></script>
-    <script src="assets/js/game.js" defer></script>
-  </body>
+  </div>
+
+
+  <div class="creator-mark" id="creatorMark">
+    <button
+      class="creator-trigger"
+      id="creatorTrigger"
+      type="button"
+      aria-expanded="false"
+      aria-controls="creatorReveal"
+    >by japutraa</button>
+    <div class="creator-reveal" id="creatorReveal" role="note">
+      <strong id="creatorName">Adrian Janitra Putra</strong>
+      <span id="creatorHint">Dirakit saat pikiran berada sedikit di atas nada dasarnya.</span>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="flash" id="flash"></div>
+
+  <!--
+    Echo Atlas
+    Copyright (C) 2026 Adrian Janitra Putra
+    SPDX-License-Identifier: GPL-3.0-only
+  -->
+  <!-- Echo Atlas modular repository · ID / EN / DE · by japutraa -->
+  <script src="js/i18n.js"></script>
+  <script src="js/areas.js"></script>
+  <script src="js/app.js"></script>
+</body>
 </html>

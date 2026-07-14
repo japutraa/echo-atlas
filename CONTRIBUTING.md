@@ -1,30 +1,20 @@
 # Contributing
 
-Thank you for your interest in Echo Atlas.
+Contributions are welcome under the terms of the GNU GPL v3.
 
-## Reporting bugs
+## Before submitting a pull request
 
-Please include:
+- keep the game functional without a build step
+- run `node --check` on every JavaScript file
+- test Challenge Mode and Free Mode
+- verify Indonesian, English, and German UI states
+- preserve keyboard and touch accessibility
+- avoid external audio assets unless their licensing is clearly documented
 
-- browser and version
-- operating system
-- steps to reproduce
-- expected behavior
-- actual behavior
-- console errors, when available
+## File responsibilities
 
-## Proposing changes
-
-Keep the core experience:
-
-- calm and visually restrained
-- playable without external dependencies
-- accessible through keyboard and mouse/touch
-- musically respectful when referencing traditions
-- fully functional in all three interface languages
-
-For large changes, open an issue before submitting a pull request.
-
-## Code style
-
-The project currently uses one self-contained `index.html` file. Keep changes readable and avoid introducing a build tool unless it provides a clear benefit.
+- `index.html`: semantic markup
+- `css/styles.css`: visual design and responsive layout
+- `js/i18n.js`: translations
+- `js/areas.js`: musical and visual area configuration
+- `js/app.js`: runtime, sound synthesis, and interaction
