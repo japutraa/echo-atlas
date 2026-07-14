@@ -1,18 +1,22 @@
 {
-  "name": "Echo Atlas",
-  "short_name": "Echo Atlas",
-  "description": "A multilingual ambient listening puzzle and scale explorer by japutraa.",
+  "id": "./",
+  "name": "Perang Narasi: Republik Timeline",
+  "short_name": "Perang Narasi",
+  "description": "Game satire politik Indonesia tentang buzzer, aktivisme, propaganda, dan literasi demokrasi.",
+  "lang": "id-ID",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#080a10",
-  "theme_color": "#080a10",
-  "lang": "id",
+  "orientation": "any",
+  "background_color": "#0b0b0a",
+  "theme_color": "#0b0b0a",
   "icons": [
     {
-      "src": "assets/favicon.svg",
+      "src": "assets/icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
+
