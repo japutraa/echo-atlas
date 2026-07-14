@@ -1,30 +1,70 @@
 # Echo Atlas
 
 [![Play Echo Atlas](https://img.shields.io/badge/PLAY-ECHO%20ATLAS-8fa7d8?style=for-the-badge)](https://japutraa.github.io/echo-atlas/)
-[![Deploy to GitHub Pages](https://github.com/japutraa/echo-atlas/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/japutraa/echo-atlas/actions/workflows/deploy-pages.yml)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/japutraa/echo-atlas/blob/main/LICENSE)
-
-## [Play directly in your browser](https://japutraa.github.io/echo-atlas/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 **Echo Atlas** is a multilingual ambient listening puzzle and scale explorer created by **Adrian Janitra Putra / [japutraa](https://github.com/japutraa)**.
 
-The project uses the Web Audio API to synthesize every instrument, drone, ambience layer, transition, and feedback sound directly in the browser.
+[Play Echo Atlas in your browser](https://japutraa.github.io/echo-atlas/)
+
+## Overview
+
+Echo Atlas turns musical intervals, scales, and tuning systems into an exploratory browser experience.
+
+The main journey presents a sequence of listening challenges across several tonal environments. Players hear a pattern and reconstruct it by ear. Free Mode opens the complete atlas for unrestricted exploration without correct or incorrect answers.
+
+Every sound is synthesized in real time with the Web Audio API. The project uses no external audio files, runtime libraries, frameworks, or build tools.
 
 ## Features
 
-- 24-stage Challenge Mode
-- Free Mode with all 12 areas unlocked
-- traditional, diatonic, chromatic, and microtonal scale references
-- six abstract Hidden Gardens
-- generative ambient backgrounds with crossfades
-- separate Ambience and Instrument volume controls
+- 24-stage listening challenge
+- unrestricted Free Mode
+- 12 distinct sound areas
+- diatonic, pentatonic, chromatic, traditional, and microtonal scale references
+- six abstract Hidden Gardens inspired by modern musical languages
+- generative ambient backgrounds with smooth transitions
+- individual Ambience and Instrument volume controls
 - Bahasa Indonesia, English, and German
-- persistent progress and settings through `localStorage`
-- keyboard, pointer, and touch controls
-- no third-party runtime libraries
-- no external audio files
+- keyboard, pointer, and touch input
+- locally stored progress and preferences
+- responsive interface for desktop and mobile browsers
+- entirely client-side operation
 
-## Repository structure
+## Musical Areas
+
+The atlas is divided into two groups.
+
+### World Scales
+
+The main challenge explores:
+
+- diatonic major and natural minor
+- Hirajōshi-inspired pentatonic material
+- Sléndro- and Pélog-inspired synthetic approximations
+- Bhairav- and Yaman-inspired interval structures
+- twelve-tone equal temperament
+- twenty-four-tone equal temperament
+
+These areas are interpretive listening environments rather than authoritative reproductions of any specific musical tradition or tuning practice.
+
+### Hidden Gardens
+
+The Hidden Gardens transform familiar modern musical gestures into restrained ambient sound worlds. Their identities are suggested through interval structure, timbre, rhythm, and spatial character rather than literal genre imitation.
+
+## Controls
+
+| Input | Action |
+| --- | --- |
+| `1`–`0`, `-`, `=` | Play available tone buttons |
+| `Space` or `Enter` | Listen, replay, or continue |
+| `M` | Mute or unmute all sound |
+| `B` | Switch Ambience between 0% and 50% |
+| `[` / `]` | Lower or raise Instrument volume |
+| `Escape` | Close the creator easter egg |
+
+All primary controls are also available through the interface.
+
+## Project Structure
 
 ```text
 echo-atlas/
@@ -37,97 +77,116 @@ echo-atlas/
 │   └── app.js
 ├── assets/
 │   └── favicon.svg
-├── .github/
-│   ├── workflows/
-│   │   ├── deploy-pages.yml
-│   │   └── validate.yml
-│   └── ISSUE_TEMPLATE/
 ├── manifest.webmanifest
 ├── robots.txt
 ├── sitemap.xml
 ├── README.md
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
-├── REPOSITORY_SETUP.md
-├── LICENSE
-├── .editorconfig
-├── .gitignore
-└── .nojekyll
+└── LICENSE
 ```
 
-### JavaScript modules
+### `index.html`
 
-- `js/i18n.js` contains all interface translations and localized descriptions.
-- `js/areas.js` contains scale definitions, area metadata, colors, roots, and challenge settings.
-- `js/app.js` contains rendering, interaction, persistence, puzzle logic, Web Audio synthesis, and generative ambience.
+Contains the semantic structure of the application and references the external stylesheets and scripts.
 
-The files are classic browser scripts rather than bundled ES modules, so the game still works on simple static hosting without a build step.
+### `css/styles.css`
 
-## Run locally
+Contains the complete visual system, responsive layout, interface states, transitions, and decorative effects.
 
-A local server is recommended because browser audio and storage behavior can differ when opening a page through `file://`.
+### `js/i18n.js`
+
+Contains all interface translations and localized descriptions for Indonesian, English, and German.
+
+### `js/areas.js`
+
+Contains area definitions, scales, interval values, note labels, colors, roots, difficulty settings, and sound-profile metadata.
+
+### `js/app.js`
+
+Contains the application runtime, rendering, state persistence, puzzle logic, Web Audio synthesis, generative ambience, and user interaction.
+
+## Running Locally
+
+No installation or compilation step is required.
+
+A local web server is recommended:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Open:
+Then open:
 
 ```text
 http://localhost:8080
 ```
 
-## Deployment
+A recent version of Chrome, Firefox, Safari, or Edge is recommended.
 
-The repository includes `.github/workflows/deploy-pages.yml`. The workflow stages only the public runtime files into a temporary `dist/` directory before deployment.
+Audio begins only after user interaction, in accordance with modern browser autoplay policies.
 
-After pushing to `main`:
+## Technical Notes
 
-1. Open **Settings → Pages**.
-2. Select **GitHub Actions** as the publishing source.
-3. Open the **Actions** tab.
-4. Confirm that **Deploy Echo Atlas to GitHub Pages** completes successfully.
+Echo Atlas uses:
 
-The deployed game will be available at:
+- Web Audio API
+- CSS custom properties
+- `localStorage`
+- modern browser JavaScript
+- static HTML and CSS
 
-```text
-https://japutraa.github.io/echo-atlas/
-```
+The audio engine creates oscillators, filters, envelopes, convolution reverb, generative background layers, and crossfades directly in the browser.
 
-## Keyboard controls
+User progress, language selection, and volume preferences remain on the local device. The application does not require an account or server-side database.
 
-| Key | Action |
-| --- | --- |
-| `1`–`0`, `-`, `=` | Play tone buttons |
-| `Space` or `Enter` | Listen or continue |
-| `M` | Mute or unmute all sound |
-| `B` | Switch Ambience between 0% and 50% |
-| `[` / `]` | Lower or raise Instrument volume |
-| `Escape` | Close the creator easter egg |
+## Accessibility
 
-## GitHub About
+The interface includes:
 
-**Description**
+- keyboard navigation
+- descriptive button labels
+- visible focus states
+- responsive controls
+- independent volume channels
+- persistent language selection
+- reduced reliance on color alone for game state
 
-```text
-A multilingual ambient listening puzzle and scale explorer built with the Web Audio API.
-```
+Because the central mechanic is auditory, headphones or good speakers are strongly recommended.
 
-**Website**
+## Cultural and Musical Context
 
-```text
-https://japutraa.github.io/echo-atlas/
-```
+Echo Atlas references musical concepts from several traditions. These references are intended as creative and educational listening prompts.
 
-**Suggested topics**
+Synthetic approximations such as the Sléndro- and Pélog-inspired areas are not presented as replacements for the diverse tuning systems, performance practices, instruments, or cultural contexts from which those names originate.
 
-```text
-web-audio music-game ambient microtonal music-theory browser-game
-generative-music javascript multilingual github-pages
-```
+## Contributing
+
+Contributions are welcome.
+
+Before submitting changes, please:
+
+- preserve the build-free static architecture
+- validate JavaScript syntax
+- test Challenge Mode and Free Mode
+- verify all three interface languages
+- preserve keyboard and touch accessibility
+- document any new external assets and their licenses
+- treat referenced musical traditions with appropriate care
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for additional guidance.
+
+## Credits
+
+Created, designed, and developed by:
+
+**Adrian Janitra Putra**  
+**japutraa**
 
 ## License
 
-Copyright © 2026 Adrian Janitra Putra.
+Echo Atlas is free software licensed under the **GNU General Public License v3.0**.
 
-Echo Atlas is licensed under the **GNU General Public License v3.0**. See [`LICENSE`](LICENSE).
+You may use, study, modify, and redistribute the project under the terms of the GPL. Distributed modified versions must remain available under the same license with their corresponding source code.
+
+See [`LICENSE`](LICENSE) for the complete license text.

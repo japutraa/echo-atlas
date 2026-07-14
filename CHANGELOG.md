@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1 — 2026-07-14
+
+- Reworked the README into evergreen product and technical documentation.
+- Removed repository deployment and GitHub configuration instructions.
+- Expanded the musical, architectural, accessibility, and cultural context sections.
+
 ## 1.1.0 — 2026-07-14
 
 ### Changed
